@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     url: "https://wasm.com.br/",
     images: [{ url: "/og.png", width: 1200, height: 630 }],
   },
+  icons: { icon: "/wasm-logo.svg" },
   twitter: {
     card: "summary_large_image",
     title: "wasm.com.br — Games that refuse to die",
@@ -39,10 +40,12 @@ const jsonLd = {
     "Preservation and portability initiative bringing decompiled games to the browser through WebAssembly.",
   publisher: {
     "@type": "Organization",
-    name: "Origami LTD",
+    name: "Origami 限",
     url: "https://origami.ltd",
   },
 };
+
+export const viewport = { themeColor: "#654ff0" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
