@@ -17,12 +17,13 @@ export function GameBox({
   const scene = useRef<HTMLAnchorElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
-  const onMove = (event: React.PointerEvent) => {
+  const onMove = (event: { clientX: number; clientY: number }) => {
     const rect = scene.current?.getBoundingClientRect();
     if (!rect) return;
     const px = (event.clientX - rect.left) / rect.width - 0.5;
     const py = (event.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: -py * 22, y: px * 30 });
+    // Side lean is generous on purpose: the spine coming into view is what sells the 3D.
+    setTilt({ x: -py * 26, y: px * 85 });
   };
 
   return (
@@ -32,7 +33,9 @@ export function GameBox({
       href={href}
       aria-label={`Play ${title} in your browser`}
       onPointerMove={onMove}
+      onMouseMove={onMove}
       onPointerLeave={() => setTilt({ x: 0, y: 0 })}
+      onMouseLeave={() => setTilt({ x: 0, y: 0 })}
     >
       <div
         className="box"
