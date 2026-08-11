@@ -31,6 +31,7 @@ export interface EmscriptenFS {
   writeFile: (path: string, data: string | Uint8Array) => void;
   stat: (path: string) => unknown;
   mount: (type: unknown, options: object, path: string) => void;
+  chdir: (path: string) => void;
   syncfs: (populate: boolean, callback: (error?: unknown) => void) => void;
   ErrnoError: new (code: number) => Error;
 }
