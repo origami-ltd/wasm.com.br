@@ -1,0 +1,16 @@
+{
+  "name": "@wasm/runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser-side runtime shared by the wasm.com.br game ports: on-demand archive streaming and picked-folder persistence",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test test/streaming.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,6 +1,9 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "wasm-landing", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }
+    { "name": "wasm-landing", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 },
+    { "name": "generals-shell", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev:generals"], "port": 5173 },
+    { "name": "vice-shell", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev:vice"], "port": 5174 },
+    { "name": "wasm-storybook", "runtimeExecutable": "npm", "runtimeArgs": ["run", "storybook"], "port": 6006 }
   ]
 }

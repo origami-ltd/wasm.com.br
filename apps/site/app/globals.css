@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@import "@origami-ltd/ui/theme.css";
+
+/* Everything visual lives in the design system now. What is left is page-level base styling —
+   in @layer base on purpose, so the .ogx-* component rules still win over it (an unlayered
+   `a` rule here would repaint every link in the design system, nav included). */
+@layer base {
+  html, body { min-height: 100%; overscroll-behavior-y: none; }
+
+  a { color: var(--signal); text-decoration: none; }
+  a:hover { color: var(--signal-2); text-decoration: underline; }
+}

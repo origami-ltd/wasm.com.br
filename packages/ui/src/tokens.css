@@ -1,0 +1,106 @@
+/* ============================================================================
+   @origami-ltd/ui — tokens
+   One variable contract, four brands. Set data-brand on <html> (or any
+   container) and every component follows.
+
+   The contract, in full:
+     --bg --surface --raised   page → panel → control, darkest to lightest
+     --ink --muted             text
+     --line                    hairlines and borders
+     --accent                  the brand's primary signal
+     --signal                  the secondary/warm signal (warnings, calls to action)
+     --ok --error              state
+     --brand-red               the 限, never brand-dependent
+     --corner-cut              the shared clip-path silhouette
+     --font-body --font-mono
+   ========================================================================== */
+
+:root,
+[data-brand="origami"] {
+  --ink: #dfe7e8;
+  --bg: #020403;
+  --surface: #050908;
+  --raised: #0a100e;
+  --accent: #00f0ff;        /* origami cyan */
+  --signal: #00f0ff;
+  --brand-red: #ff1438;     /* the 限 */
+  --ok: hsl(150 100% 45%);
+  --error: hsl(0 100% 60%);
+  --line: rgba(223, 231, 232, 0.14);
+  --muted: rgba(223, 231, 232, 0.62);
+  --corner-cut: polygon(0 0, 100% 0, 100% calc(100% - 0.9rem), calc(100% - 1.125rem) 100%, 0 100%);
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  color-scheme: dark;
+}
+
+[data-brand="origami"][data-theme="light"] {
+  --ink: #08090b;
+  --bg: #f8e602;            /* origami acid-yellow light mode */
+  --surface: #f2e002;
+  --raised: #ebd902;
+  --line: rgba(8, 9, 11, 0.2);
+  --muted: rgba(8, 9, 11, 0.66);
+  color-scheme: light;
+}
+
+[data-brand="wasm"] {
+  --ink: #dfe7e8;
+  --bg: #07070d;
+  --surface: #0a0a14;
+  --raised: #10101f;
+  --accent: #654ff0;        /* WebAssembly purple */
+  --signal: #dfff00;        /* acid yellow complement */
+  --signal-2: #00e5ff;
+  --brand-red: #ff1438;
+  --ok: hsl(150 100% 45%);
+  --error: hsl(0 100% 60%);
+  --line: rgba(223, 231, 232, 0.14);
+  --muted: rgba(223, 231, 232, 0.62);
+  --corner-cut: polygon(0 0, 100% 0, 100% calc(100% - 0.9rem), calc(100% - 1.125rem) 100%, 0 100%);
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  color-scheme: dark;
+}
+
+/* The Jarvis HUD the Generals shell is built around. */
+[data-brand="generals"] {
+  --ink: hsl(180 100% 90%);
+  --bg: hsl(210 100% 2%);
+  --surface: hsl(210 100% 3%);
+  --raised: hsl(210 80% 5%);
+  --accent: hsl(188 100% 50%);  /* HUD cyan */
+  --signal: hsl(33 100% 50%);   /* HUD warm orange */
+  --brand-red: #ff1438;
+  --ok: hsl(150 100% 45%);
+  --error: hsl(0 100% 60%);
+  --line: hsl(188 100% 20%);
+  --muted: hsl(188 40% 60%);
+  --corner-cut: polygon(0 0, 100% 0, 100% calc(100% - 0.9rem), calc(100% - 1.125rem) 100%, 0 100%);
+  /* Sans, deliberately: the shipped page renders in the browser default sans and
+     switching it to mono here would restyle a live game page. */
+  --font-body: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: dark;
+}
+
+/* Vice City: 1986 Miami after dark — neon pink over a purple night, cyan as the
+   second light source. The same ramp as every other brand, tuned magenta. */
+[data-brand="vice"] {
+  --ink: hsl(300 30% 94%);
+  --bg: hsl(288 60% 5%);
+  --surface: hsl(288 55% 7%);
+  --raised: hsl(288 50% 11%);
+  --accent: hsl(328 100% 59%);  /* neon pink */
+  --signal: hsl(188 100% 57%);  /* neon cyan */
+  --signal-2: hsl(38 100% 60%); /* sunset amber */
+  --brand-red: #ff1438;
+  --ok: hsl(150 100% 45%);
+  --error: hsl(0 100% 60%);
+  --line: hsl(328 60% 32%);
+  --muted: hsl(300 22% 70%);
+  --corner-cut: polygon(0 0, 100% 0, 100% calc(100% - 0.9rem), calc(100% - 1.125rem) 100%, 0 100%);
+  --font-body: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  color-scheme: dark;
+}

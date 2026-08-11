@@ -1,0 +1,6 @@
+/* Storybook renders the same pipeline the game shells use: Tailwind utilities on top of the
+   token/component layer. source(none) + an explicit @source keeps the scan to the stories
+   instead of walking the whole monorepo. */
+@import "tailwindcss" source(none);
+@import "../src/theme.css";
+@source "../stories";

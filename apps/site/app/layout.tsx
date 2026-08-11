@@ -49,8 +49,8 @@ export const viewport = { themeColor: "#654ff0" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" data-brand="wasm">
+      <body className="ogx-body">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

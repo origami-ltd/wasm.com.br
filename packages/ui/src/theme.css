@@ -1,0 +1,33 @@
+/* ============================================================================
+   @origami-ltd/ui — Tailwind v4 entry
+   Consume it AFTER Tailwind itself, from the app's own CSS file:
+
+     @import "tailwindcss";
+     @import "@origami-ltd/ui/theme.css";
+
+   That order matters. `@import "tailwindcss"` has to live in the app's CSS so
+   Tailwind's automatic source detection roots itself in the app and finds the
+   app's class names — rooted inside node_modules it would find nothing.
+   ========================================================================== */
+
+@import "./tokens.css";
+/* In the components layer so plain utilities win over component classes. */
+@import "./components.css" layer(components);
+
+/* The token contract, published as Tailwind utilities: bg-bg, text-ink,
+   border-line, text-accent… `inline` makes them compile straight to
+   var(--accent) instead of a copy, so switching data-brand on any ancestor
+   re-themes every utility underneath it. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-signal: var(--signal);
+  --color-ok: var(--ok);
+  --color-error: var(--error);
+  --color-brand-red: var(--brand-red);
+}

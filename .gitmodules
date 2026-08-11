@@ -1,0 +1,6 @@
+[submodule "games/wasm-generals"]
+	path = games/wasm-generals
+	url = https://github.com/origami-ltd/wasm-generals.git
+[submodule "games/wasm-vice-city"]
+	path = games/wasm-vice-city
+	url = https://github.com/origami-ltd/wasm-vice-city.git

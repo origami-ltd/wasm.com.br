@@ -1,7 +1,17 @@
 {
   "name": "wasm.com.br",
   "private": true,
-  "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
-  "dependencies": { "next": "^15.3.0", "react": "^19.0.0", "react-dom": "^19.0.0" },
-  "devDependencies": { "@types/node": "^22", "@types/react": "^19", "typescript": "^5" }
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "games/*/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @wasm/site",
+    "build": "npm run build --workspace @wasm/site",
+    "storybook": "npm run storybook --workspace @origami-ltd/ui",
+    "build-storybook": "npm run build-storybook --workspace @origami-ltd/ui",
+    "dev:generals": "npm run dev --workspace @wasm/generals-web",
+    "dev:vice": "npm run dev --workspace @wasm/vice-web"
+  }
 }
