@@ -329,6 +329,63 @@
   text-transform: uppercase;
 }
 
+/* ---------------------------------------------------------------- first-run gate */
+/* Fixed to the viewport, never to the canvas frame. Anchoring it inside the frame made it
+   inherit the letterboxed game area, which on a phone is a few hundred pixels tall — the panel
+   then had nowhere to go and the whole dialog was unreadable. */
+.ogx-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  /* Phones put a toolbar over the bottom of the viewport; keep the last button reachable. */
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .ogx-gate { align-items: center; padding: 32px; }
+}
+
+.ogx-gate-card {
+  width: 100%;
+  max-width: 720px;
+  padding: 20px;
+}
+
+@media (min-width: 640px) {
+  .ogx-gate-card { padding: 28px; }
+}
+
+/* Requirement list: one row per capability, ✓ or ✗ in the brand's own colours. */
+.ogx-req {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ogx-req > li { display: contents; }
+.ogx-req-mark { font-weight: 800; line-height: 1.5; }
+.ogx-req-ok .ogx-req-mark { color: var(--ok); }
+.ogx-req-missing .ogx-req-mark { color: var(--error); }
+.ogx-req-label { color: var(--ink); font-size: 0.85rem; line-height: 1.5; }
+.ogx-req-missing .ogx-req-detail {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.ogx-req-ok .ogx-req-detail { display: none; }
+
 /* Faint CRT wash for the game pages. */
 .ogx-scanlines {
   background-image:

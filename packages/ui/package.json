@@ -7,6 +7,7 @@
     "./tokens.css": "./src/tokens.css",
     "./components.css": "./src/components.css",
     "./theme.css": "./src/theme.css",
+    "./gate": "./src/gate.ts",
     "./react": "./src/react/index.tsx"
   },
   "scripts": {
