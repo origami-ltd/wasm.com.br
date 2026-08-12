@@ -64,7 +64,7 @@ export default function Home() {
           />
           <GameBox
             href="https://vicecity.wasm.com.br"
-            cover="/box-vice-cover.svg"
+            cover="/box-vice-cover.jpg"
             title="Grand Theft Auto: Vice City"
             back={["WebAssembly + WebGL 2", "Streaming assets", "Saves in your browser"]}
           />
