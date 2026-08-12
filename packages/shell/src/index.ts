@@ -8,7 +8,7 @@
  */
 
 import { mountGate, type Gate } from "@origami-ltd/ui/gate";
-import { checkCapabilities, isHandheld, type Capability, type GpuKind } from "@wasm/runtime";
+import { checkCapabilities, isHandheld, type Capability, type EmscriptenModule, type GpuKind } from "@wasm/runtime";
 
 import { el, render, type ChromeOptions } from "@origami-ltd/ui/chrome";
 import { createLogger, createStatus, watchStall, type Logger, type Status } from "./report";
@@ -41,8 +41,25 @@ export interface ShellOptions extends ChromeOptions {
   logEndpoint?: string;
   /** Narrate the boot from the engine's own output. */
   onLine?: (line: string) => void;
-  /** Validate and remember a picked install. Returns a message, or undefined on success. */
+  /**
+   * Validate and remember a picked install. Returns a message, or undefined on success.
+   *
+   * Only remembers it. Getting the files into a running engine is `mountPicked`, so that the
+   * two ports share one answer to "what happens after a successful pick".
+   */
   onPick: (root: FileSystemDirectoryHandle) => Promise<string | undefined>;
+  /**
+   * Mount a just-picked install into an engine that is paused waiting for it.
+   *
+   * Without this the only way to use a new pick is to reload, and reloading loses it: the saved
+   * File System Access handle comes back from IndexedDB needing its permission re-granted, and a
+   * fresh page load has no user gesture to grant it with. The gate reopens, the player picks
+   * again, and it reloads again - a loop with no way out. The permission is live at the moment of
+   * the pick, so that is the moment to use it.
+   */
+  mountPicked?: (instance: EmscriptenModule, root: FileSystemDirectoryHandle) => Promise<void>;
+  /** The run dependency the engine holds while it has no game files. */
+  assetDependency?: string;
   /** Engine frame counter, for the stall detector. */
   frame?: () => number | undefined;
   /** Tell the engine about the mute state. */
@@ -56,6 +73,13 @@ export interface ShellOptions extends ChromeOptions {
 }
 
 export interface Shell {
+  /**
+   * Hand the shell an engine that is paused on its asset dependency.
+   *
+   * Called from preRun by whichever port is booting. The shell keeps it so a later pick can be
+   * mounted straight in rather than going through a page load.
+   */
+  holdEngine(instance: EmscriptenModule): void;
   log: Logger;
   status: Status;
   gate: Gate;
@@ -67,6 +91,9 @@ export interface Shell {
 
 export function createShell(options: ShellOptions): Shell {
   render(el("app"), options);
+
+  /** The engine waiting for game files, if one is. */
+  let waiting: EmscriptenModule | undefined;
 
   const log = createLogger({ endpoint: options.logEndpoint, onLine: options.onLine });
   const status = createStatus();
@@ -91,7 +118,25 @@ export function createShell(options: ShellOptions): Shell {
     capabilities,
     handheld: isHandheld(),
     pickerId: `${options.key}-install`,
-    onPick: options.onPick,
+    onPick: async (root) => {
+      const problem = await options.onPick(root);
+      if (problem) return problem;
+
+      // A pick is only useful to an engine that is already waiting; feed it directly.
+      if (waiting && options.mountPicked) {
+        const instance = waiting;
+        waiting = undefined;
+        await options.mountPicked(instance, root);
+        if (options.assetDependency) instance.removeRunDependency(options.assetDependency);
+        gate.hide();
+        return undefined;
+      }
+
+      // Nothing running yet - the player opened the picker before starting the engine, so a
+      // reload is the only way in, and there is no live permission to lose.
+      setTimeout(() => location.replace(location.pathname), 700);
+      return undefined;
+    },
   });
 
   if (gate.blocked) {
@@ -105,5 +150,5 @@ export function createShell(options: ShellOptions): Shell {
     location.reload();
   });
 
-  return { log, status, gate, sound, capabilities, fit };
+  return { holdEngine: (instance) => { waiting = instance; }, log, status, gate, sound, capabilities, fit };
 }
