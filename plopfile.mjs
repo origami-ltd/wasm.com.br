@@ -135,10 +135,22 @@ export default function plop(plop) {
       },
       {
         type: "add",
-        path: "games/{{slug}}/LICENSE",
+        path: "games/{{slug}}/LICENSE.md",
         templateFile: "templates/LICENSE-{{license}}.hbs",
         force: true,
         skip: (answers) => (answers.license === "MIT" ? false : "GPL text is not generated"),
+      },
+      {
+        type: "add",
+        path: "games/{{slug}}/CONTRIBUTING.md",
+        templateFile: "templates/CONTRIBUTING.md.hbs",
+        force: true,
+      },
+      {
+        type: "add",
+        path: "games/{{slug}}/SECURITY.md",
+        templateFile: "templates/SECURITY.md.hbs",
+        force: true,
       },
       // The workflow that checks a recorded row against its own handshake hash. Shipped with the
       // port because a licence that names a validation nobody runs is a licence nobody keeps.
@@ -172,6 +184,77 @@ export default function plop(plop) {
         type: "add",
         path: "games/{{slug}}/web/public/sitemap.xml",
         templateFile: "templates/sitemap.xml.hbs",
+        force: true,
+      },
+    ],
+  });
+
+  // Not every repository is a port. A library or a tool needs the same four tabs GitHub shows -
+  // README, Contributing, License, Security - and the same proof-of-usage paperwork, without the
+  // game-specific page surface.
+  plop.setGenerator("repo-paperwork", {
+    description: "Licence, usage record, contributing and security policy for a non-port repository",
+    prompts: [
+      {
+        type: "input",
+        name: "slug",
+        message: "Repository name (origami-ltd/<slug>), e.g. origami-dogu",
+        validate: (value) => (value ? true : "required"),
+      },
+      {
+        type: "input",
+        name: "path",
+        message: "Where to write it, e.g. ../origami-dogu",
+        validate: (value) => (value ? true : "required"),
+      },
+      {
+        type: "input",
+        name: "upstreamName",
+        message: "Upstream project, if this wraps one (blank if the code is all ours)",
+        default: "",
+      },
+      {
+        type: "input",
+        name: "upstreamUrl",
+        message: "Upstream URL (blank if none)",
+        default: "",
+      },
+      {
+        type: "input",
+        name: "subdomain",
+        message: "Subdomain on wasm.ltd, if it has a page (blank if none)",
+        default: "",
+      },
+    ],
+    actions: [
+      {
+        type: "add",
+        path: "{{path}}/LICENSE.md",
+        templateFile: "templates/LICENSE-MIT.hbs",
+        force: true,
+      },
+      {
+        type: "add",
+        path: "{{path}}/PROOF_OF_USAGE.md",
+        templateFile: "templates/PROOF_OF_USAGE.md.hbs",
+        force: true,
+      },
+      {
+        type: "add",
+        path: "{{path}}/CONTRIBUTING.md",
+        templateFile: "templates/CONTRIBUTING.md.hbs",
+        force: true,
+      },
+      {
+        type: "add",
+        path: "{{path}}/SECURITY.md",
+        templateFile: "templates/SECURITY.md.hbs",
+        force: true,
+      },
+      {
+        type: "add",
+        path: "{{path}}/.github/workflows/validate-proof-of-usage.yml",
+        templateFile: "templates/validate-proof-of-usage.yml.hbs",
         force: true,
       },
     ],
