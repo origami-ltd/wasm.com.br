@@ -1,4 +1,4 @@
-import { directoryFromFiles } from "@wasm/runtime";
+import { ARCHIVE_EXTENSIONS, archiveKind, directoryFromFiles, extractInto, readArchive } from "@wasm/runtime";
 /**
  * The first-run gate: "point me at your copy of the game".
  *
@@ -85,15 +85,19 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
         </p>
         <div class="border border-line bg-surface p-3 sm:p-4">
           <h3 class="m-0 mb-2 flex flex-wrap items-center gap-2 text-sm uppercase tracking-[0.08em] text-accent">
-            Select your game folder
+            Select your game folder or installation files
             <button type="button" data-gate="info" aria-label="Where to find the game folder"
                     class="ogx-hud-button h-6 min-h-6 w-6 shrink-0 rounded-full px-0 text-xs [clip-path:none]">i</button>
           </h3>
           <p class="text-[13px] leading-relaxed text-muted">
-            Point the browser at your installed copy. The files stay on your machine.
+            Point the browser at your installed copy, or at the folder holding a
+            <strong class="text-ink">.zip</strong>, <strong class="text-ink">.iso</strong> or
+            <strong class="text-ink">.bin/.cue</strong> you never unpacked — that gets extracted
+            in place and becomes the game folder. Everything stays on your machine.
           </p>
-          <button type="button" data-gate="pick" class="ogx-hud-button mt-3 w-full sm:w-auto">Select game folder</button>
+          <button type="button" data-gate="pick" class="ogx-hud-button mt-3 w-full sm:w-auto">Select folder or file</button>
           <input type="file" data-gate="files" multiple webkitdirectory directory hidden>
+          <input type="file" data-gate="archive" hidden accept=".zip,.iso,.img,.bin,.cue,.rar">
           <p data-gate="note" class="mt-2 min-h-4 text-xs leading-relaxed text-signal"></p>
         </div>
         <div data-gate="help" hidden
@@ -115,9 +119,84 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
     if (note) note.textContent = text;
   };
 
+  /**
+   * Find an archive in the picked folder, recursively.
+   *
+   * The install is tried first and only searched if it is not already there — a real install
+   * folder must never be ignored in favour of an old zip sitting next to it.
+   */
+  const findArchive = async (
+    directory: FileSystemDirectoryHandle,
+    depth = 0,
+  ): Promise<{ file: File; parent: FileSystemDirectoryHandle } | undefined> => {
+    if (depth > 3) return undefined; // deep enough for Downloads/<game>/<disc>, not a whole drive
+    const subdirectories: FileSystemDirectoryHandle[] = [];
+    for await (const [name, handle] of (directory as unknown as {
+      entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
+    }).entries()) {
+      if (handle.kind === "directory") {
+        subdirectories.push(handle as FileSystemDirectoryHandle);
+        continue;
+      }
+      const lower = name.toLowerCase();
+      // .cue only describes the .bin beside it, so the .bin is what gets read.
+      if (lower.endsWith(".cue")) continue;
+      if (ARCHIVE_EXTENSIONS.some((extension) => lower.endsWith(extension))) {
+        return { file: await (handle as FileSystemFileHandle).getFile(), parent: directory };
+      }
+    }
+    for (const subdirectory of subdirectories) {
+      const found = await findArchive(subdirectory, depth + 1);
+      if (found) return found;
+    }
+    return undefined;
+  };
+
   const deliver = async (root: FileSystemDirectoryHandle) => {
     setNote("Scanning…");
-    setNote((await options.onPick(root)) ?? "Install found. Starting…");
+    const installed = await options.onPick(root);
+    if (!installed) {
+      setNote("Install found. Starting…");
+      return;
+    }
+
+    // No install here. Before reporting that, look for something to unpack.
+    //
+    // Unpacking repeats, because archives nest in practice: the Vice City disc download is a zip
+    // holding a .bin, and the .bin is a MODE1/2352 image holding the actual files. One pass would
+    // stop at the .bin and report no install.
+    let message: string | undefined = installed;
+    const opened = new Set<string>();
+    for (let round = 0; round < 3; round += 1) {
+      const archive = await findArchive(root);
+      if (!archive || opened.has(archive.file.name)) break;
+      opened.add(archive.file.name);
+
+      if (archiveKind(archive.file.name) === "rar") {
+        setNote(`${archive.file.name}: RAR cannot be opened in the browser — extract it first.`);
+        return;
+      }
+
+      try {
+        setNote(`Reading ${archive.file.name}…`);
+        const entries = await readArchive(archive.file);
+        // Extract beside the archive, so the folder the player chose becomes the game folder and
+        // a second visit skips all of this.
+        await extractInto(archive.parent, entries, (done, total, path) => {
+          setNote(`Extracting ${archive.file.name}: ${done}/${total} — ${path}`);
+        });
+        setNote("Extracted. Checking…");
+        message = await options.onPick(archive.parent);
+        if (!message) {
+          setNote("Install found. Starting…");
+          return;
+        }
+      } catch (error) {
+        setNote(`Could not read ${archive.file.name}: ${(error as Error).message}`);
+        return;
+      }
+    }
+    setNote(message ?? "Install found. Starting…");
   };
 
   // Fallback path: Firefox, Safari and everything on iOS have no directory picker, so the file
@@ -146,7 +225,7 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
     }
 
     try {
-      await deliver(await picker({ id: options.pickerId, mode: "read" }));
+      await deliver(await picker({ id: options.pickerId, mode: "readwrite" }));
     } catch (error) {
       console.debug("folder selection cancelled", error);
       setNote("");
