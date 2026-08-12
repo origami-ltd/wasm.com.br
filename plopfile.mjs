@@ -106,6 +106,12 @@ export default function plop(plop) {
       },
       {
         type: "add",
+        path: "games/{{slug}}/PROOF_OF_USAGE.md",
+        templateFile: "templates/PROOF_OF_USAGE.md.hbs",
+        force: true,
+      },
+      {
+        type: "add",
         path: "games/{{slug}}/LICENSE",
         templateFile: "templates/LICENSE-{{license}}.hbs",
         force: true,
