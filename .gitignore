@@ -14,3 +14,4 @@ storybook-static
 # actually hides edits, and it is already set here.
 CLAUDE.md
 AGENTS.md
+next_session_prompt.md
