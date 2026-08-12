@@ -1,4 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "//": "The redirect from the old apex is deliberately not here yet: wasm.ltd does not resolve until its DNS records exist, and a redirect to a host that does not answer takes the live site down. Both old hosts still serve this project directly in the meantime. Put the redirects back the moment the new apex resolves."
-}
