@@ -32,7 +32,7 @@ export const Branding: StoryObj = {
         A preservation initiative by <OrigamiBrand />
       </Kicker>
       <TopNav
-        brand="wasm.com.br"
+        brand="wasm.ltd"
         logo="/wasm-logo.svg"
         links={[
           { label: "About", href: "#about" },
@@ -49,7 +49,7 @@ export const Box3D: StoryObj = {
   render: () => (
     <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
       <GameBox
-        href="https://generals.wasm.com.br"
+        href="https://generals.wasm.ltd"
         cover="/box-generals-cover.jpg"
         title="Command & Conquer: Generals Zero Hour"
         back={["WebAssembly + WebGPU", "Streaming assets", "LAN multiplayer"]}

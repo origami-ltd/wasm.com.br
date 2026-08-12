@@ -6,8 +6,8 @@ export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
-    { url: "https://wasm.com.br/", changeFrequency: "weekly", priority: 1 },
-    { url: "https://generals.wasm.com.br/", changeFrequency: "weekly", priority: 0.9 },
-    { url: "https://vicecity.wasm.com.br/", changeFrequency: "weekly", priority: 0.9 },
+    { url: "https://wasm.ltd/", changeFrequency: "weekly", priority: 1 },
+    { url: "https://generals.wasm.ltd/", changeFrequency: "weekly", priority: 0.9 },
+    { url: "https://revc.wasm.ltd/", changeFrequency: "weekly", priority: 0.9 },
   ];
 }

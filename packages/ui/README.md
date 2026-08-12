@@ -1,7 +1,7 @@
 # @origami-ltd/ui
 
-Shared visual language for **origami.ltd**, **wasm.com.br** and the game pages
-(**generals.wasm.com.br**, **vicecity.wasm.com.br**). One variable contract, four
+Shared visual language for **origami.ltd**, **wasm.ltd** and the game pages
+(**generals.wasm.ltd**, **revc.wasm.ltd**). One variable contract, four
 brands: set `data-brand="origami" | "wasm" | "generals" | "vice"` on `<html>`
 (plus `data-theme="light"` for origami's yellow mode) and every component follows.
 

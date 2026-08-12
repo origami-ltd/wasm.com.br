@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "The browser shell every wasm.com.br game page is built from: chrome, logging, status, display, input and sound",
+  "description": "The browser shell every wasm.ltd game page is built from: chrome, logging, status, display, input and sound",
   "exports": {
     ".": "./src/index.ts"
   },

@@ -1,4 +1,4 @@
-# wasm.com.br
+# wasm.ltd
 
 Games that refuse to die. A preservation and portability initiative: games that have
 already been decompiled, or had their source officially released, compiled to
@@ -11,11 +11,11 @@ system and browser runtime, and each game port as a submodule.
 ## Layout
 
 ```
-apps/site               wasm.com.br — Next.js, deployed on Vercel
+apps/site               wasm.ltd — Next.js, deployed on Vercel
 packages/ui             @origami-ltd/ui — tokens, components, Storybook (4 brands)
 packages/runtime        @wasm/runtime — archive streaming, picked-folder persistence
 games/wasm-generals     submodule — Command & Conquer: Generals Zero Hour  (public)
-games/wasm-vice-city    submodule — Grand Theft Auto: Vice City            (private)
+games/wasm-vice-city    submodule — the reVC decompilation                 (private)
 ```
 
 Every game page is the same page: the same design tokens, the same corner-cut chrome,
@@ -25,7 +25,7 @@ for recognising an install; everything else is shared.
 ## Getting started
 
 ```bash
-git clone --recurse-submodules https://github.com/origami-ltd/wasm.com.br.git
+git clone --recurse-submodules https://github.com/origami-ltd/wasm.ltd.git
 ```
 
 `games/wasm-vice-city` is private — clones without access to it will skip that
@@ -39,7 +39,7 @@ npm install
 |---|---|
 | `npm run dev` | the landing site |
 | `npm run dev:generals` | the Generals shell |
-| `npm run dev:vice` | the Vice City shell |
+| `npm run dev:vice` | the reVC shell |
 | `npm run storybook` | the design system, with a brand switcher |
 | `npm test --workspace @wasm/runtime` | the archive-cache tests |
 
@@ -48,15 +48,15 @@ the game submodule — that is what resolves `@origami-ltd/ui` and `@wasm/runtim
 engine itself (CMake + emscripten) is built inside the submodule, as documented there.
 
 A game shell needs its engine bundle (`/GeneralsXZH.js`, `/reVC.js`) served beside it.
-Without one, the Vice City shell still runs so the install picker can be used; the
+Without one, the reVC shell still runs so the install picker can be used; the
 Generals shell needs a production build (`npm run build --workspace @wasm/generals-web`)
 because its engine import is only externalised at build time.
 
 ## Status
 
-- **Generals Zero Hour** — playable at [generals.wasm.com.br](https://generals.wasm.com.br).
+- **Generals Zero Hour** — playable at [generals.wasm.ltd](https://generals.wasm.ltd).
   WebGPU rendering, streaming assets, LAN multiplayer between browsers.
-- **Vice City** — the [reVC](https://github.com/mrxenginner/reVC) decompilation. The page,
+- **reVC** — the [reVC](https://github.com/mrxenginner/reVC) decompilation. The page,
   the install gate and the streaming layer are in place; the emscripten build of the engine
   is the next step.
 - **PROTON/WINE on WebAssembly** — extends the initiative beyond source-available games.

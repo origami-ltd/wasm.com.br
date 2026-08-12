@@ -1,8 +1,8 @@
 /**
- * Scaffolding for the wasm.com.br ports.
+ * Scaffolding for the wasm.ltd ports.
  *
  * Every port is the same shape — an upstream decompilation, an Emscripten build, the shared page
- * from packages/shell, and a subdomain on wasm.com.br — so the things that describe a port should
+ * from packages/shell, and a subdomain on wasm.ltd — so the things that describe a port should
  * be generated from that shape rather than written from scratch and then drifting.
  *
  *   npx plop port-readme
@@ -26,18 +26,18 @@ export default function plop(plop) {
       {
         type: "input",
         name: "game",
-        message: "Full game name, e.g. Grand Theft Auto: Vice City",
+        message: "Full port name, e.g. reVC",
         validate: (value) => (value ? true : "required"),
       },
       {
         type: "input",
         name: "title",
-        message: "Page wordmark, e.g. Vice City",
+        message: "Page wordmark, e.g. reVC",
       },
       {
         type: "input",
         name: "subdomain",
-        message: "Subdomain on wasm.com.br, e.g. vicecity",
+        message: "Subdomain on wasm.ltd, e.g. revc",
         validate: (value) => (value ? true : "required"),
       },
       {
@@ -94,7 +94,7 @@ export default function plop(plop) {
       {
         type: "input",
         name: "installHint",
-        message: "What the player must own, e.g. an installed copy of GTA: Vice City",
+        message: "What the player must own, e.g. an installed copy of the game",
       },
     ],
     actions: [

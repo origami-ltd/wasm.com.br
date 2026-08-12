@@ -7,7 +7,7 @@
  * environment impossible to review as a whole.
  *
  * So the host decides. A page served from localhost links to the other dev servers; a page served
- * from any *.wasm.com.br host links to the matching subdomain of that same host, so a staging
+ * from any *.wasm.ltd host links to the matching subdomain of that same host, so a staging
  * apex keeps you inside staging. Anything else — a Vercel preview URL, where sibling deployments
  * cannot be derived — falls back to production, and can be overridden per environment.
  */
@@ -22,12 +22,12 @@ interface SiteDef {
   label: string;
 }
 
-const APEX = "wasm.com.br";
+const APEX = "wasm.ltd";
 
 export const SITES: Record<SiteKey, SiteDef> = {
-  shelf: { subdomain: null, devPort: 3210, label: "wasm.com.br" },
+  shelf: { subdomain: null, devPort: 3210, label: "wasm.ltd" },
   generals: { subdomain: "generals", devPort: 5181, label: "Generals" },
-  vice: { subdomain: "vicecity", devPort: 8100, label: "Vice City" },
+  vice: { subdomain: "revc", devPort: 8100, label: "reVC" },
 };
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1", "0.0.0.0"]);

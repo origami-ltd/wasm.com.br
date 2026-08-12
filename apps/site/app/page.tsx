@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-[1080px] px-6">
       <div className="pt-[22px]">
-        <TopNav brand="wasm.com.br" logo="/wasm-logo.svg" links={NAV} />
+        <TopNav brand="wasm.ltd" logo="/wasm-logo.svg" links={NAV} />
       </div>
 
       <header className="pt-[88px] pb-14">
@@ -26,7 +26,7 @@ export default function Home() {
         </div>
         <p className="mt-[26px] max-w-[720px] text-[1.02rem] text-muted">
           When a community reconstructs a game&apos;s source code, that game can outlive the
-          platform it was written for. <strong className="text-ink">wasm.com.br</strong> takes games
+          platform it was written for. <strong className="text-ink">wasm.ltd</strong> takes games
           that have already been decompiled, or had their source officially released, and compiles
           them to <strong className="text-ink">WebAssembly</strong>, so they run in the browser: no
           installer, no emulator setup, on any operating system.
@@ -59,13 +59,13 @@ export default function Home() {
           <GameBox
             site="generals"
             cover="/box-generals-cover.jpg"
-            title="Command & Conquer: Generals Zero Hour"
+            title="GeneralsX"
             back={["WebAssembly + WebGPU", "Streaming assets", "LAN multiplayer"]}
           />
           <GameBox
             site="vice"
             cover="/box-vice-cover.jpg"
-            title="Grand Theft Auto: Vice City"
+            title="reVC"
             back={["WebAssembly + WebGL 2", "Streaming assets", "Saves in your browser"]}
           />
         </div>
@@ -96,7 +96,7 @@ export default function Home() {
       <footer className="border-t border-line pt-9 pb-[52px] text-[0.8rem] text-muted">
         <p>
           <OrigamiBrand /> ·{" "}
-          <a href="https://github.com/origami-ltd/wasm-generals">GitHub</a> · wasm.com.br
+          <a href="https://github.com/origami-ltd/wasm-generals">GitHub</a> · wasm.ltd
         </p>
       </footer>
     </main>

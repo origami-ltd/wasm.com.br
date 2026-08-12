@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Browser-side runtime shared by the wasm.com.br game ports: on-demand archive streaming and picked-folder persistence",
+  "description": "Browser-side runtime shared by the wasm.ltd game ports: on-demand archive streaming and picked-folder persistence",
   "exports": {
     ".": "./src/index.ts"
   },

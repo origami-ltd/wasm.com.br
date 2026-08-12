@@ -11,9 +11,9 @@ const preview: Preview = {
         icon: "paintbrush",
         items: [
           { value: "origami", title: "origami.ltd" },
-          { value: "wasm", title: "wasm.com.br" },
-          { value: "generals", title: "generals.wasm.com.br" },
-          { value: "vice", title: "vicecity.wasm.com.br" },
+          { value: "wasm", title: "wasm.ltd" },
+          { value: "generals", title: "generals.wasm.ltd" },
+          { value: "vice", title: "revc.wasm.ltd" },
         ],
         dynamicTitle: true,
       },

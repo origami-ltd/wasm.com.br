@@ -2,7 +2,7 @@
   "name": "@origami-ltd/ui",
   "version": "0.2.0",
   "private": true,
-  "description": "Shared visual language for origami.ltd, wasm.com.br and the game pages",
+  "description": "Shared visual language for origami.ltd, wasm.ltd and the game pages",
   "exports": {
     "./tokens.css": "./src/tokens.css",
     "./components.css": "./src/components.css",
