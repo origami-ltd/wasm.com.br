@@ -1,39 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "//": "The site moved to wasm.ltd. The old apex still resolves and is still attached to this project, so it is answered with a permanent redirect rather than serving a second copy: one canonical host, and every link ever shared keeps working.",
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "wasm.com.br"
-        }
-      ],
-      "destination": "https://wasm.ltd/$1",
-      "permanent": true
-    },
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.wasm.com.br"
-        }
-      ],
-      "destination": "https://wasm.ltd/$1",
-      "permanent": true
-    },
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.wasm.ltd"
-        }
-      ],
-      "destination": "https://wasm.ltd/$1",
-      "permanent": true
-    }
-  ]
+  "//": "The redirect from the old apex is deliberately not here yet: wasm.ltd does not resolve until its DNS records exist, and a redirect to a host that does not answer takes the live site down. Both old hosts still serve this project directly in the meantime. Put the redirects back the moment the new apex resolves."
 }
