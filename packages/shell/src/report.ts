@@ -44,9 +44,18 @@ export function createLogger(options: LogOptions = {}): Logger {
       navigator.sendBeacon(endpoint, chunk);
       return;
     }
-    chain = chain.then(() => fetch(endpoint, { method: "POST", body: chunk }).catch(() => {
-      dead = true;
-    }));
+    // Marked dead on the first refusal, including a 404 - a static host has no sink, and every
+    // further POST is a red line in the console for no gain. `dead` is set before the request so
+    // a flush already in flight cannot queue another after it.
+    dead = true;
+    chain = chain.then(async () => {
+      try {
+        const response = await fetch(endpoint, { method: "POST", body: chunk });
+        if (response.ok) dead = false; // a real sink: keep shipping
+      } catch {
+        /* no sink here */
+      }
+    });
   };
 
   const log = ((line: string): void => {

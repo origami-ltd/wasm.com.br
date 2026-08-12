@@ -28,8 +28,13 @@ export interface ArchiveEntry {
   name: string;
   url: string;
   size: number;
-  /** Set when the player picked their install with the directory picker; reads then bypass the server. */
-  handle?: FileSystemFileHandle;
+  /**
+   * Set when the player picked their own install; reads then bypass the server.
+   *
+   * A File rather than a handle, because this is posted to the reader worker and a File is
+   * clonable in every engine while a handle is not.
+   */
+  file?: File;
 }
 
 export interface AssetManifest {
@@ -42,13 +47,12 @@ export interface AssetManifest {
 const workerSource = `
   postMessage("ready");
   onmessage = async (event) => {
-    const { url, handle, start, end, sab } = event.data;
+    const { url, file, start, end, sab } = event.data;
     const state = new Int32Array(sab, 0, 2);
     const data = new Uint8Array(sab, 8);
     try {
       let bytes;
-      if (handle) {
-        const file = await handle.getFile();
+      if (file) {
         bytes = new Uint8Array(await file.slice(start, end + 1).arrayBuffer());
       } else {
         const response = await fetch(url, { headers: { Range: "bytes=" + start + "-" + end } });
@@ -93,7 +97,16 @@ export class ArchiveStreamer {
   }
 
   /** Protected only so the cache/readahead math can be exercised without a browser. */
-  protected fetchChunkSync(url: string, index: number, handle?: FileSystemFileHandle, chunks = 1): Uint8Array {
+  /**
+   * Read a chunk, blocking until the worker fills the shared buffer.
+   *
+   * The worker is sent a File, never a handle. postMessage structured-clones its payload, and a
+   * FileSystemFileHandle is not clonable in every engine - nor is the stand-in built over a file
+   * input, which carries methods. Safari threw DataCloneError here, so the worker never received
+   * the request, the wait below spun until its timeout, and the game sat on the splash screen
+   * forever. A File clones everywhere.
+   */
+  protected fetchChunkSync(url: string, index: number, file?: File, chunks = 1): Uint8Array {
     if (!this.worker || !this.buffer) {
       this.onError("SharedArrayBuffer unavailable: archives cannot stream.");
       return new Uint8Array(0);
@@ -102,8 +115,8 @@ export class ArchiveStreamer {
     Atomics.store(state, 0, 0);
     const start = index * CHUNK_SIZE;
     this.worker.postMessage({
-      url: handle ? "" : new URL(url, location.href).href,
-      handle,
+      url: file ? "" : new URL(url, location.href).href,
+      file,
       start,
       end: start + CHUNK_SIZE * chunks - 1,
       sab: this.buffer,
@@ -122,7 +135,7 @@ export class ArchiveStreamer {
     return new Uint8Array(this.buffer.slice(8, 8 + (state[1] ?? 0)));
   }
 
-  private takeChunk(url: string, index: number, handle?: FileSystemFileHandle): Uint8Array {
+  private takeChunk(url: string, index: number, file?: File): Uint8Array {
     const key = `${url}#${index}`;
     const cached = this.cache.get(key);
     if (cached) {
@@ -138,7 +151,7 @@ export class ArchiveStreamer {
     this.run = sequential ? this.run + 1 : 0;
     // A long sequential run means a map load walking an archive: pull much more per round trip.
     const chunks = sequential ? (this.run > 2 ? READAHEAD_RUN : READAHEAD) : 1;
-    const span = this.fetchChunkSync(url, index, handle, chunks);
+    const span = this.fetchChunkSync(url, index, file, chunks);
     this.nextIndex.set(url, index + span.length / CHUNK_SIZE);
     for (let offset = 0; offset < span.length; offset += CHUNK_SIZE) {
       const part = span.subarray(offset, Math.min(offset + CHUNK_SIZE, span.length));
@@ -162,7 +175,7 @@ export class ArchiveStreamer {
   async prime(entries: ArchiveEntry[], onProgress: (done: number, name: string) => void = () => {}): Promise<void> {
     let done = 0;
     for (const entry of entries) {
-      if (entry.handle) continue; // already local
+      if (entry.file) continue; // already local
       const step = CHUNK_SIZE * READAHEAD_RUN;
       for (let start = 0; start < entry.size; start += step) {
         const end = Math.min(start + step, entry.size) - 1;
@@ -195,8 +208,8 @@ export class ArchiveStreamer {
           continue;
         }
         try {
-          const bytes = entry.handle
-            ? new Uint8Array(await (await entry.handle.getFile()).slice(start, end + 1).arrayBuffer())
+          const bytes = entry.file
+            ? new Uint8Array(await entry.file.slice(start, end + 1).arrayBuffer())
             : new Uint8Array(await (await fetch(entry.url, {
                 headers: { Range: `bytes=${start}-${end}` },
               })).arrayBuffer());
@@ -226,8 +239,8 @@ export class ArchiveStreamer {
     this.pending.add(key);
     const start = index * CHUNK_SIZE;
     const end = Math.min(start + CHUNK_SIZE * READAHEAD, entry.size) - 1;
-    const source = entry.handle
-      ? entry.handle.getFile().then((file) => file.slice(start, end + 1).arrayBuffer())
+    const source = entry.file
+      ? entry.file.slice(start, end + 1).arrayBuffer()
       : fetch(entry.url, { headers: { Range: `bytes=${start}-${end}` } }).then((r) => r.arrayBuffer());
     void source
       .then((buffer) => {
@@ -249,7 +262,7 @@ export class ArchiveStreamer {
       once per skipped sound — keep it allocation-light, never touch the DOM. */
   ensure(archive: string, offset: number, size: number): number {
     const entry = this.byName.get((archive.split(/[\\/]/).pop() ?? archive).toLowerCase());
-    if (!entry || entry.handle) return 1; // unknown → behave as before; local disk → fast reads
+    if (!entry || entry.file) return 1; // unknown → behave as before; local disk → fast reads
     const first = Math.floor(offset / CHUNK_SIZE);
     const last = Math.floor((offset + Math.max(1, size) - 1) / CHUNK_SIZE);
     let resident = 1;
@@ -293,7 +306,7 @@ export class ArchiveStreamer {
         // The engine skips cold sounds before opening them, so any read that reaches this point
         // is expected to block until the real bytes exist.
         for (let index = firstChunk; index <= lastChunk; index += 1) {
-          const chunk = this.takeChunk(entry.url, index, entry.handle);
+          const chunk = this.takeChunk(entry.url, index, entry.file);
           const chunkStart = index * CHUNK_SIZE;
           const from = Math.max(position, chunkStart) - chunkStart;
           const to = Math.min(end, chunkStart + chunk.length) - chunkStart;
