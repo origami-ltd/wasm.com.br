@@ -32,6 +32,15 @@ export interface GateOptions {
   pickerId: string;
   /** Resolve to an error message to display, or undefined when the pick was good. */
   onPick: (root: FileSystemDirectoryHandle) => Promise<string | undefined>;
+  /**
+   * Re-open the folder the player chose last time, asking for permission.
+   *
+   * Called from the button's own click handler, because that is the only place a user gesture
+   * exists — requestPermission is refused without one, which is why a remembered folder still had
+   * to be picked again on every single visit. Returns undefined when there is nothing saved or the
+   * player declines, and the picker opens as usual.
+   */
+  resume?: () => Promise<boolean>;
 }
 
 export interface Gate {
@@ -240,6 +249,18 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
   });
 
   find("pick")?.addEventListener("click", async () => {
+    // A remembered folder beats asking again. This runs inside the click, so the permission
+    // prompt is allowed; for a folder already granted once, browsers re-grant it silently.
+    if (options.resume) {
+      setNote("Reopening your game folder…");
+      try {
+        if (await options.resume()) return;
+      } catch (error) {
+        console.debug("could not resume the saved folder", error);
+      }
+      setNote("");
+    }
+
     const picker = (window as unknown as {
       showDirectoryPicker?: (o: object) => Promise<FileSystemDirectoryHandle>;
     }).showDirectoryPicker;

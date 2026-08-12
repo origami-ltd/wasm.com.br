@@ -60,6 +60,11 @@ export interface ShellOptions extends ChromeOptions {
   mountPicked?: (instance: EmscriptenModule, root: FileSystemDirectoryHandle) => Promise<void>;
   /** The run dependency the engine holds while it has no game files. */
   assetDependency?: string;
+  /**
+   * Re-open the install the player chose last time. Runs inside the gate's click, where a user
+   * gesture exists and the browser will re-grant a folder it has granted before.
+   */
+  resumeSaved?: () => Promise<FileSystemDirectoryHandle | undefined>;
   /** Engine frame counter, for the stall detector. */
   frame?: () => number | undefined;
   /** Tell the engine about the mute state. */
@@ -95,6 +100,26 @@ export function createShell(options: ShellOptions): Shell {
   /** The engine waiting for game files, if one is. */
   let waiting: EmscriptenModule | undefined;
 
+  /**
+   * Put an install to work: mount it into the engine that is waiting for it, or reload if none is.
+   *
+   * Shared by a fresh pick and by resuming a remembered folder, because after the permission is in
+   * hand those two are the same thing.
+   */
+  const use = async (root: FileSystemDirectoryHandle): Promise<void> => {
+    if (waiting && options.mountPicked) {
+      const instance = waiting;
+      waiting = undefined;
+      await options.mountPicked(instance, root);
+      if (options.assetDependency) instance.removeRunDependency(options.assetDependency);
+      gate.hide();
+      return;
+    }
+    // Nothing running yet — the picker was opened before the engine started, so a reload is the
+    // only way in, and there is no live permission to lose.
+    setTimeout(() => location.replace(location.pathname), 700);
+  };
+
   const log = createLogger({ endpoint: options.logEndpoint, onLine: options.onLine });
   const status = createStatus();
   const { fit } = mountDisplay({ setResolution: options.setResolution });
@@ -118,23 +143,16 @@ export function createShell(options: ShellOptions): Shell {
     capabilities,
     handheld: isHandheld(),
     pickerId: `${options.key}-install`,
+    resume: options.resumeSaved && (async () => {
+      const root = await options.resumeSaved!();
+      if (!root) return false;
+      await use(root);
+      return true;
+    }),
     onPick: async (root) => {
       const problem = await options.onPick(root);
       if (problem) return problem;
-
-      // A pick is only useful to an engine that is already waiting; feed it directly.
-      if (waiting && options.mountPicked) {
-        const instance = waiting;
-        waiting = undefined;
-        await options.mountPicked(instance, root);
-        if (options.assetDependency) instance.removeRunDependency(options.assetDependency);
-        gate.hide();
-        return undefined;
-      }
-
-      // Nothing running yet - the player opened the picker before starting the engine, so a
-      // reload is the only way in, and there is no live permission to lose.
-      setTimeout(() => location.replace(location.pathname), 700);
+      await use(root);
       return undefined;
     },
   });

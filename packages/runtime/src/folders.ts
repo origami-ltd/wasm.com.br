@@ -43,7 +43,10 @@ export class FolderStore {
    * Returns an empty map if the player declines — the caller falls back to the server. Keys with
    * nothing saved are simply absent.
    */
-  async load(keys: readonly string[]): Promise<Map<string, FileSystemDirectoryHandle>> {
+  async load(
+    keys: readonly string[],
+    options: { request?: boolean } = {},
+  ): Promise<Map<string, FileSystemDirectoryHandle>> {
     const database = await this.open();
     // Every read must be issued before the first await: an IDB transaction closes as soon as the
     // event loop yields, so a second get() after awaiting would throw "transaction has finished".
@@ -61,8 +64,12 @@ export class FolderStore {
     for (const [key, request] of pending) {
       const directory = (await request) as PermissionedHandle | undefined;
       if (!directory) continue;
+      // requestPermission needs a user gesture, and a page load does not have one — asking there
+      // fails every time, which is why a saved folder had to be re-picked on every visit. So it is
+      // only asked for when the caller says a gesture is in hand (the gate's own click handler).
       if ((await directory.queryPermission?.({ mode: "read" })) !== "granted"
-          && (await directory.requestPermission?.({ mode: "read" })) !== "granted") {
+          && (!options.request
+              || (await directory.requestPermission?.({ mode: "read" })) !== "granted")) {
         return new Map(); // declined: treat the whole install as unavailable, not half of it
       }
       found.set(key, directory);
