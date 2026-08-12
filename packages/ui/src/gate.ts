@@ -196,6 +196,25 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
         return;
       }
     }
+    // Name what is actually there. A disc that unpacks into data1.hdr + data*.cab is an
+    // InstallShield installer, not an installed game — the files are real but every one of them
+    // is still inside the cabinet, so "no install here" reads as though the wrong folder was
+    // picked when the folder was right and the disc simply needs installing first.
+    if (message) {
+      const names: string[] = [];
+      for await (const [name, handle] of (root as unknown as {
+        entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
+      }).entries()) {
+        if (handle.kind === "file") names.push(name.toLowerCase());
+      }
+      if (names.some((n) => n.endsWith(".hdr")) && names.some((n) => /^data\d*\.cab$/.test(n))) {
+        setNote(
+          "That is an installation disc, not an installed copy — the game is still packed inside "
+          + "its .cab files. Install it once on a PC (or with unshield), then pick that folder.",
+        );
+        return;
+      }
+    }
     setNote(message ?? "Install found. Starting…");
   };
 
