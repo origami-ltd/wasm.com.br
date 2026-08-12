@@ -72,6 +72,12 @@ export default function plop(plop) {
       },
       {
         type: "input",
+        name: "workspace",
+        message: "npm workspace name, e.g. @wasm/vice-web",
+        validate: (value) => (value ? true : "required"),
+      },
+      {
+        type: "input",
         name: "target",
         message: "Emscripten output basename, e.g. reVC",
       },
