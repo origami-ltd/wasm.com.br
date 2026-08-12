@@ -1,0 +1,101 @@
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-ebellumat-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/ebellumat)
+[![License: {{license}}](https://img.shields.io/badge/License-{{license}}-blue.svg)](LICENSE)
+[![WebAssembly](https://img.shields.io/badge/WebAssembly-{{encodeBadge gpu}}-654ff0?logo=webassembly&logoColor=white)](https://{{subdomain}}.wasm.com.br)
+
+# {{{title}}} Web — {{{game}}} in the browser
+
+**Play it: [{{subdomain}}.wasm.com.br](https://{{subdomain}}.wasm.com.br)** — bring your own
+installed copy of the game. The release *is* the site; there is nothing to download.
+
+## The wasm.com.br initiative
+
+**wasm.com.br** is a preservation and portability initiative for games that have already been
+decompiled or had their source released. Once a game's code exists again, it deserves to run on
+the one platform that needs no installer, no emulator setup and no operating system loyalty:
+the browser.
+
+Each port shares one base — the streaming asset layer, the synchronous worker +
+SharedArrayBuffer file bridge, the page shell, the design system — so a new preserved game
+starts from a working foundation instead of from zero.
+
+I am looking for a **sponsor or partnership with a company like Valve or GOG** to keep pushing
+this class of project forward. If that's you: [lbj.erasmo@gmail.com](mailto:lbj.erasmo@gmail.com).
+
+## Built on {{upstreamName}}
+
+This is a WebAssembly port of **[{{upstreamName}}]({{upstreamUrl}})**, not a new decompilation.
+Every line of game logic here is theirs; the work in this repository is the browser layer around
+it — the Emscripten build, the platform backends, and the page that hosts it.
+{{#if upstreamNote}}
+
+{{upstreamName}}'s own note on licensing, quoted in full:
+
+> {{{upstreamNote}}}
+
+That note is theirs and it stands. It is why this repository is source-available for education,
+documentation and modding, and why it distributes no game data of any kind.
+{{/if}}
+
+## What this runs
+
+The complete game compiled with Emscripten:
+
+- **{{gpu}} rendering**
+- **Streaming assets** — the game's archives are read on demand; nothing is repackaged into the
+  binary
+- **Your copy, your files** — no game data is distributed. On first run you point the page at
+  your installed copy and the files are read straight off your disk
+- **Saves in your browser**, kept in IndexedDB so progress survives a reload
+- **Gamepad support** through the browser's Gamepad API
+- **The game's own menus, load screens and options** — nothing is reimplemented
+
+## Building from source
+
+```bash
+# toolchain (macOS): emscripten + cmake
+brew install emscripten cmake
+
+# engine → {{target}}.{js,wasm}
+{{{buildCommand}}}
+
+# page (TypeScript + Tailwind), from the wasm.com.br workspace root
+npm run build --workspace @wasm/{{subdomain}}-web
+
+# serve it locally
+{{{serveCommand}}}
+```
+
+Requirements to play: a browser with {{gpu}} and SharedArrayBuffer, {{{installHint}}}, and HTTPS —
+SharedArrayBuffer demands a cross-origin-isolated secure context (`localhost` is exempt).
+
+## How to contribute
+
+1. Check [current issues](https://github.com/origami-ltd/{{slug}}/issues) and open a discussion
+2. Build from source with the steps above
+3. Submit issues or pull requests with detailed information
+
+## Support this project
+
+- **[Buy me a coffee](https://buymeacoffee.com/ebellumat)** — supports the wasm.com.br initiative
+
+## License
+
+Our portion — the Emscripten build, the platform backends and the web page — is **{{license}}**
+([LICENSE](LICENSE)).
+
+The game logic comes from [{{upstreamName}}]({{upstreamUrl}}) and carries its authors' own terms;
+see the note above. No game assets are included or distributed here.
+
+All trademarks are the property of their respective owners. This project is not endorsed by or
+affiliated with the rights holders.
+
+## Special thanks
+
+- **[{{upstreamName}}]({{upstreamUrl}})** and its contributors, for the decompilation this port
+  stands on
+- **All contributors and sponsors** for helping keep these games playable
+
+---
+
+A project by [Origami LTD](https://origami.ltd) (限) · part of **wasm.com.br** ·
+WebAssembly port by **Erasmo "ebellumat" Bellumat** — [github.com/ebellumat](https://github.com/ebellumat)

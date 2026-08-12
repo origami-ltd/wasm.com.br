@@ -19,6 +19,7 @@ import {
 
 export { el, render, headerLinks, githubLink, type ChromeOptions } from "@origami-ltd/ui/chrome";
 export { SITES, siteUrl, productionUrl, type SiteKey } from "@origami-ltd/ui/sites";
+export { query, hostInstall } from "./query";
 export { createLogger, createStatus, watchStall, mb, type Logger, type Status } from "./report";
 export {
   mountDisplay, mountPointer, mountSound, unlockAudio,

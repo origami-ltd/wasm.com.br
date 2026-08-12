@@ -42,7 +42,9 @@ const home = (): string =>
  * source link. Composing them here instead means neither page can drift from the other.
  */
 export const headerLinks = (repo?: string): string =>
-  `${COFFEE}${repo ? githubLink(repo) : ""}${home()}`;
+  // Source last: it is the only one that is an icon rather than a label, so it reads as a
+  // trailing affordance instead of interrupting the two worded buttons.
+  `${COFFEE}${home()}${repo ? githubLink(repo) : ""}`;
 
 export function githubLink(repo: string): string {
   return `
