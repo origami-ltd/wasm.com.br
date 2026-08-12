@@ -251,10 +251,18 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
   find("pick")?.addEventListener("click", async () => {
     // A remembered folder beats asking again. This runs inside the click, so the permission
     // prompt is allowed; for a folder already granted once, browsers re-grant it silently.
+    //
+    // It must never be able to prevent picking. On a browser with no File System Access API the
+    // lookup can simply never settle, and this button is the only way in — so it races a timeout
+    // and any outcome other than a clean success falls through to the picker.
     if (options.resume) {
       setNote("Reopening your game folder…");
       try {
-        if (await options.resume()) return;
+        const resumed = await Promise.race([
+          options.resume(),
+          new Promise<false>((resolve) => setTimeout(() => resolve(false), 3000)),
+        ]);
+        if (resumed) return;
       } catch (error) {
         console.debug("could not resume the saved folder", error);
       }
