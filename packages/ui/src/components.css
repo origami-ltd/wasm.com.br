@@ -200,25 +200,32 @@
 
 /* Angled bottom-right cut, drawn as a 1px border via a clipped ::before.
    --ogx-panel-surface overrides the fill (the canvas frame wants pure black). */
+/* The fill is a 1px-inset copy of the outer shape, which is where the geometry gets fussy: two
+   parallel 45° lines whose boxes differ by 1px sit 1.41px apart, so `clip-path: inherit` draws
+   the diagonal edge ~40% thicker than the straight ones and the corner looks crooked. Shrinking
+   the inner cut by (2 - √2) puts the diagonal back at a true 1px. */
 .ogx-panel {
+  --ogx-cut: 14px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   background: var(--line);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--ogx-cut)), calc(100% - var(--ogx-cut)) 100%, 0 100%);
 }
 .ogx-panel::before {
   content: "";
   position: absolute;
   z-index: -1;
   inset: 1px;
-  clip-path: inherit;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--ogx-cut) + 0.586px),
+                     calc(100% - var(--ogx-cut) + 0.586px) 100%, 0 100%);
   background: var(--ogx-panel-surface, var(--raised));
 }
 
 /* Compact HUD button. Distinct from .ogx-button: that one is the site's chunky
    call to action, this one sits in a control strip above a game canvas. */
 .ogx-hud-button {
+  --ogx-cut: 10px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -226,7 +233,7 @@
   padding: 0 0.625rem;
   border: 0;
   background: var(--line);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--ogx-cut)), calc(100% - var(--ogx-cut)) 100%, 0 100%);
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 15%, transparent),
               inset 0 0 15px color-mix(in srgb, var(--accent) 8%, transparent);
   color: var(--accent);
@@ -242,7 +249,9 @@
   position: absolute;
   z-index: -1;
   inset: 1px;
-  clip-path: inherit;
+  /* Same (2 - √2) correction as .ogx-panel — see the note there. */
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--ogx-cut) + 0.586px),
+                     calc(100% - var(--ogx-cut) + 0.586px) 100%, 0 100%);
   background: var(--raised);
 }
 .ogx-hud-button:hover {
