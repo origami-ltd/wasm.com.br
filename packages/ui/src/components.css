@@ -229,6 +229,12 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  /* Centred explicitly. min-height alone leaves the label sitting off-centre on anything that
+     is not a <button> — an <a> is inline and does not centre its own text vertically. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   min-height: 2.5rem;
   padding: 0 0.625rem;
   border: 0;
