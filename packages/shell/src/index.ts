@@ -19,6 +19,8 @@ import {
 
 export { el, render, headerLinks, githubLink, type ChromeOptions } from "@origami-ltd/ui/chrome";
 export { SITES, siteUrl, productionUrl, type SiteKey } from "@origami-ltd/ui/sites";
+import { query } from "./query";
+
 export { query, hostInstall } from "./query";
 export { createLogger, createStatus, watchStall, mb, type Logger, type Status } from "./report";
 export {
@@ -65,6 +67,14 @@ export interface ShellOptions extends ChromeOptions {
    * gesture exists and the browser will re-grant a folder it has granted before.
    */
   resumeSaved?: () => Promise<FileSystemDirectoryHandle | undefined>;
+  /**
+   * Forget the saved install.
+   *
+   * Used when a remembered folder turns out to be unusable — moved, emptied, or never the right
+   * folder in the first place. Without this a bad choice is permanent: it is reloaded, it fails,
+   * and the player has no way to point somewhere else.
+   */
+  forgetSaved?: () => Promise<void>;
   /** Engine frame counter, for the stall detector. */
   frame?: () => number | undefined;
   /** Tell the engine about the mute state. */
@@ -144,15 +154,31 @@ export function createShell(options: ShellOptions): Shell {
     handheld: isHandheld(),
     pickerId: `${options.key}-install`,
     resume: options.resumeSaved && (async () => {
-      const root = await options.resumeSaved!();
-      if (!root) return false;
-      await use(root);
-      return true;
+      // ?assets=1 exists precisely to choose a *different* install, so reopening the remembered
+      // one would defeat it — go straight to the picker.
+      if (query.pickInstall) return false;
+      try {
+        const root = await options.resumeSaved!();
+        if (!root) return false;
+        await use(root);
+        return true;
+      } catch (error) {
+        // The folder is gone, empty, or was never a game. Forget it rather than trapping the
+        // player in a saved choice they cannot get out of, and fall through to the picker.
+        log(`Saved folder is no longer usable (${(error as Error).message}); asking again.`);
+        await options.forgetSaved?.();
+        return false;
+      }
     }),
     onPick: async (root) => {
       const problem = await options.onPick(root);
-      if (problem) return problem;
-      await use(root);
+      if (problem) return problem; // nothing was saved: the player can simply pick again
+      try {
+        await use(root);
+      } catch (error) {
+        await options.forgetSaved?.();
+        return `That folder could not be loaded (${(error as Error).message}). Try another.`;
+      }
       return undefined;
     },
   });
