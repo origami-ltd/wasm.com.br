@@ -1,0 +1,17 @@
+{
+  "name": "@wasm/shell",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The browser shell every wasm.com.br game page is built from: chrome, logging, status, display, input and sound",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@origami-ltd/ui": "*",
+    "@wasm/runtime": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

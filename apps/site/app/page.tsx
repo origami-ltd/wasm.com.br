@@ -62,14 +62,18 @@ export default function Home() {
             title="Command & Conquer: Generals Zero Hour"
             back={["WebAssembly + WebGPU", "Streaming assets", "LAN multiplayer"]}
           />
+          <GameBox
+            href="https://vicecity.wasm.com.br"
+            cover="/box-vice-cover.svg"
+            title="Grand Theft Auto: Vice City"
+            back={["WebAssembly + WebGL 2", "Streaming assets", "Saves in your browser"]}
+          />
         </div>
       </section>
 
       <section className="max-w-[760px] border-t border-line py-12">
         <h2 className="ogx-card-title">In the lab</h2>
         <p className="m-0 text-[0.95rem] text-muted">
-          <strong className="text-ink">Grand Theft Auto: Vice City</strong> is in port, built on the
-          same streaming and rendering base as Generals.{" "}
           <strong className="text-ink">PROTON and WINE have been ported to WebAssembly</strong>,
           which extends the initiative beyond source-available games.{" "}
           <strong className="text-ink">Dino Crisis (GOG)</strong> is already playable through it.
