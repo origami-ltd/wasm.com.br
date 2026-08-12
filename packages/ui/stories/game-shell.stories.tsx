@@ -57,6 +57,30 @@ export const GeneralsPage: StoryObj = {
 };
 
 /**
+ * Both brands at once.
+ *
+ * A story that renders one brand at a time cannot show a difference *between* them, which is how
+ * a missing emoji glyph and a frame pinned to #000 both shipped: each looked fine on its own.
+ * These are the same markup twice, differing only by data-brand, so anything that is not purely
+ * a colour swap stands out as a mismatched pair.
+ */
+export const BothBrands: StoryObj = {
+  name: "Both brands",
+  render: () => (
+    <div className="grid gap-6">
+      {[
+        { brand: "generals", title: "GeneralsX", subtitle: "WebAssembly + WebGPU", repo: "origami-ltd/wasm-generals" },
+        { brand: "vice", title: "Vice City", subtitle: "WebAssembly + WebGL 2", repo: "origami-ltd/wasm-vice-city" },
+      ].map((row) => (
+        <div key={row.brand} data-brand={row.brand} className="bg-bg">
+          <Chrome title={row.title} subtitle={row.subtitle} repo={row.repo} />
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/**
  * Both header link sets side by side. They are generated from one function, so a link that
  * appears in one row and not the other is a bug you can see here.
  */

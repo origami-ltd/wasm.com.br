@@ -25,9 +25,13 @@ export interface ChromeOptions {
   overlays?: string;
 }
 
+// The emoji carries its own font stack. Brand fonts differ per port — Vice City's body font is a
+// mono stack whose fallback has no ☕ glyph, so the same string rendered as a cup on one page and
+// as a missing-glyph wedge on the other.
 const COFFEE = `
   <a href="https://buymeacoffee.com/ebellumat" target="_blank" rel="noopener"
-     class="ogx-hud-button inline-flex items-center gap-1.5 whitespace-nowrap">☕ Buy me a coffee</a>`;
+     class="ogx-hud-button inline-flex items-center gap-1.5 whitespace-nowrap"><span
+     style="font-family: 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif">☕</span> Buy me a coffee</a>`;
 
 /** The shelf this page belongs to — every game page links home, to the shelf of its own
     environment rather than always to production. */
@@ -89,7 +93,7 @@ export function render(root: HTMLElement, options: ChromeOptions): void {
       </section>
 
       <div id="stage" class="grid min-h-0 w-full min-w-0 flex-1 place-items-center overflow-hidden">
-        <section id="frame" class="ogx-panel relative grid min-w-0 place-items-center p-2" style="--ogx-panel-surface: #000">
+        <section id="frame" class="ogx-panel relative grid min-w-0 place-items-center p-2" style="--ogx-panel-surface: var(--bg)">
           <canvas id="canvas" tabindex="0" class="block border-0 bg-black"></canvas>
 
           <button id="play" hidden class="absolute inset-0 z-[7] grid place-items-center bg-bg/90 text-accent">
