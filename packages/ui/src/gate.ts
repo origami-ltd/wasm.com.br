@@ -5,9 +5,11 @@ import { ARCHIVE_EXTENSIONS, archiveKind, directoryFromFiles, extractInto, readA
  * Framework-free on purpose — the game shells are vanilla TS. Both ports render exactly this,
  * so a layout or capability fix lands in one place instead of two.
  *
- * It checks the browser before it offers the picker. A phone gets an honest "not here, and this
- * is why" instead of a button that cannot work: every iOS browser is WebKit, and WebKit has no
- * File System Access API, so there is no folder to pick however nice the dialog looks.
+ * It checks the browser before it offers the picker, by feature and never by name — a browser
+ * gets an honest "this is what is missing" rather than a button that cannot work.
+ *
+ * Nothing here is Chromium-only any more. The directory picker is, but the file input reaches the
+ * same files everywhere else, so Safari and Firefox load a game like anything else.
  */
 
 export interface GateCapability {
