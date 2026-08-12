@@ -16,7 +16,18 @@ import { el } from "@origami-ltd/ui/chrome";
  * canvas whose width attribute changes underneath it. Windowed is capped at 1 so the picture is
  * never a blurry upscale; fullscreen is allowed past it, which is the whole point of fullscreen.
  */
-export function mountDisplay(): { fit: () => void } {
+export interface DisplayOptions {
+  /**
+   * Change the engine's render resolution, if it can do that live.
+   *
+   * Given one, fullscreen renders at the display's own resolution instead of blowing a smaller
+   * framebuffer up to fill it — which is the whole reason to go fullscreen. Leaving it out keeps
+   * the old behaviour of scaling whatever the engine is already rendering.
+   */
+  setResolution?: (width: number, height: number) => void;
+}
+
+export function mountDisplay(options: DisplayOptions = {}): { fit: () => void } {
   const canvas = el<HTMLCanvasElement>("canvas");
   const frame = el("frame");
   const stage = el("stage");
@@ -39,7 +50,25 @@ export function mountDisplay(): { fit: () => void } {
   // The engine resizes its own canvas; nothing else tells us when.
   new MutationObserver(fit).observe(canvas, { attributes: true, attributeFilter: ["width", "height"] });
   addEventListener("resize", fit);
-  document.addEventListener("fullscreenchange", fit);
+
+  // Render at the display's resolution while fullscreen, and put back what the player chose on
+  // the way out. In device pixels: screen.width is CSS pixels, so a retina panel reports half its
+  // real width and the picture would still be an upscale.
+  let windowed: [number, number] | undefined;
+  document.addEventListener("fullscreenchange", () => {
+    const fullscreen = document.fullscreenElement === frame;
+    if (options.setResolution) {
+      if (fullscreen) {
+        windowed = [canvas.width, canvas.height];
+        const ratio = devicePixelRatio || 1;
+        options.setResolution(Math.round(screen.width * ratio), Math.round(screen.height * ratio));
+      } else if (windowed) {
+        options.setResolution(windowed[0], windowed[1]);
+        windowed = undefined;
+      }
+    }
+    fit();
+  });
 
   // Fullscreen the frame rather than the canvas, so overlays drawn on top stay in the
   // fullscreened subtree. webkitRequestFullscreen is the iPad path: WebKit only shipped the

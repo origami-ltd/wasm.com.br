@@ -47,6 +47,8 @@ export interface ShellOptions extends ChromeOptions {
   frame?: () => number | undefined;
   /** Tell the engine about the mute state. */
   applyMute?: (muted: boolean) => void;
+  /** Change the engine's render resolution live, if it can. Enables fullscreen-at-native. */
+  setResolution?: (width: number, height: number) => void;
   /** Pointer capture. Omitted entirely for games that never lock. */
   pointer?: PointerOptions;
   /** Extra work on Reset, before localStorage is cleared and the page reloads. */
@@ -68,7 +70,7 @@ export function createShell(options: ShellOptions): Shell {
 
   const log = createLogger({ endpoint: options.logEndpoint, onLine: options.onLine });
   const status = createStatus();
-  const { fit } = mountDisplay();
+  const { fit } = mountDisplay({ setResolution: options.setResolution });
 
   // Before the engine exists: it builds its AudioContext during startup, well before the player
   // has clicked anything, so the patch has to be in place first.
