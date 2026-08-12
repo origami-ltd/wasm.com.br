@@ -57,13 +57,13 @@ export default function Home() {
         <p className="mt-2 mb-14 text-[0.9rem] text-muted">Ported to WebAssembly. Click a box to play.</p>
         <div className="flex flex-wrap justify-center gap-[72px]">
           <GameBox
-            href="https://generals.wasm.com.br"
+            site="generals"
             cover="/box-generals-cover.jpg"
             title="Command & Conquer: Generals Zero Hour"
             back={["WebAssembly + WebGPU", "Streaming assets", "LAN multiplayer"]}
           />
           <GameBox
-            href="https://vicecity.wasm.com.br"
+            site="vice"
             cover="/box-vice-cover.jpg"
             title="Grand Theft Auto: Vice City"
             back={["WebAssembly + WebGL 2", "Streaming assets", "Saves in your browser"]}

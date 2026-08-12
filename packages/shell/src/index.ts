@@ -10,14 +10,15 @@
 import { mountGate, type Gate } from "@origami-ltd/ui/gate";
 import { checkCapabilities, isHandheld, type Capability, type GpuKind } from "@wasm/runtime";
 
-import { el, render, type ChromeOptions } from "./chrome";
+import { el, render, type ChromeOptions } from "@origami-ltd/ui/chrome";
 import { createLogger, createStatus, watchStall, type Logger, type Status } from "./report";
 import {
   mountDisplay, mountPointer, mountSound, unlockAudio,
   type PointerOptions, type Sound,
 } from "./display";
 
-export { el, render, defaultLinks, githubLink, type ChromeOptions } from "./chrome";
+export { el, render, headerLinks, githubLink, type ChromeOptions } from "@origami-ltd/ui/chrome";
+export { SITES, siteUrl, productionUrl, type SiteKey } from "@origami-ltd/ui/sites";
 export { createLogger, createStatus, watchStall, mb, type Logger, type Status } from "./report";
 export {
   mountDisplay, mountPointer, mountSound, unlockAudio,

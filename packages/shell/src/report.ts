@@ -6,7 +6,7 @@
  * one of them had a stall detector.
  */
 
-import { el } from "./chrome";
+import { el } from "@origami-ltd/ui/chrome";
 
 export interface LogOptions {
   /** Where the host collects the log, e.g. "/ViceLog". Omit on static hosting. */

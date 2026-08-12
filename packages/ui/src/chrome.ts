@@ -1,3 +1,5 @@
+import { SITES, siteUrl } from "./sites";
+
 /**
  * The page every game shell is built from.
  *
@@ -14,8 +16,9 @@ export interface ChromeOptions {
   title: string;
   /** The line beside it — "WebAssembly + WebGL 2". */
   subtitle: string;
-  /** Header links, right-aligned. Raw HTML: each port links somewhere different. */
-  links?: string;
+  /** owner/name on GitHub. Every page carries the same three header links; this is the only
+      part that differs between them, so it is the only part a port gets to set. */
+  repo?: string;
   /** Extra HUD controls, inserted before Sound. */
   controls?: string;
   /** Extra absolutely-positioned children of the canvas frame (rings, consoles, overlays). */
@@ -26,10 +29,20 @@ const COFFEE = `
   <a href="https://buymeacoffee.com/ebellumat" target="_blank" rel="noopener"
      class="ogx-hud-button inline-flex items-center gap-1.5 whitespace-nowrap">☕ Buy me a coffee</a>`;
 
-/** The shelf this page belongs to — every game page links home. */
-const HOME = `<a href="https://wasm.com.br" class="ogx-hud-button whitespace-nowrap">wasm.com.br</a>`;
+/** The shelf this page belongs to — every game page links home, to the shelf of its own
+    environment rather than always to production. */
+const home = (): string =>
+  `<a href="${siteUrl("shelf")}" class="ogx-hud-button whitespace-nowrap">${SITES.shelf.label}</a>`;
 
-export const defaultLinks = `${COFFEE}${HOME}`;
+/**
+ * The header links, in one place for both pages.
+ *
+ * This used to be an overridable blob of HTML, and predictably the two pages ended up with
+ * different sets — Generals lost the coffee button and the link home, Vice City never had the
+ * source link. Composing them here instead means neither page can drift from the other.
+ */
+export const headerLinks = (repo?: string): string =>
+  `${COFFEE}${repo ? githubLink(repo) : ""}${home()}`;
 
 export function githubLink(repo: string): string {
   return `
@@ -48,7 +61,7 @@ export function render(root: HTMLElement, options: ChromeOptions): void {
         <h1 class="ogx-glow m-0 text-[clamp(18px,2.4vw,26px)] uppercase tracking-[0.14em] text-accent">${options.title}</h1>
         <p class="m-0 hidden text-sm text-muted sm:block">${options.subtitle}</p>
       </div>
-      <div class="flex items-center gap-2">${options.links ?? defaultLinks}</div>
+      <div class="flex items-center gap-2">${headerLinks(options.repo)}</div>
     </header>
 
     <main class="flex min-h-0 w-full flex-1 flex-col gap-2.5 px-2 py-2.5 sm:px-6">

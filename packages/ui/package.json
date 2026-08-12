@@ -8,7 +8,9 @@
     "./components.css": "./src/components.css",
     "./theme.css": "./src/theme.css",
     "./gate": "./src/gate.ts",
-    "./react": "./src/react/index.tsx"
+    "./react": "./src/react/index.tsx",
+    "./sites": "./src/sites.ts",
+    "./chrome": "./src/chrome.ts"
   },
   "scripts": {
     "storybook": "storybook dev -p 6006 --no-open",

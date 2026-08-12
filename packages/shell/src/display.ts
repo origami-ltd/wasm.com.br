@@ -7,7 +7,7 @@
  * survived a hidden tab. This is the union.
  */
 
-import { el } from "./chrome";
+import { el } from "@origami-ltd/ui/chrome";
 
 /**
  * Scale the canvas to fit its stage, letterboxed.

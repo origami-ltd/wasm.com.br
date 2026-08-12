@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { productionUrl, siteUrl, type SiteKey } from "../sites";
 
 /** Corner-cut card. */
 export function Card({ title, children }: { title: string; children: React.ReactNode }) {
@@ -79,13 +80,14 @@ export function TopNav({
 
 /** 3D game box that tilts toward the cursor. Front is the cover art. */
 export function GameBox({
-  href,
+  site,
   cover,
   title,
   back,
   spineRight = "WASM.COM.BR",
 }: {
-  href: string;
+  /** Which property this box opens. The URL follows the environment — see packages/ui/src/sites.ts. */
+  site: SiteKey;
   cover: string;
   title: string;
   back: string[];
@@ -93,6 +95,10 @@ export function GameBox({
 }) {
   const scene = useRef<HTMLAnchorElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  // Prerendered on the server, where there is no hostname to read, so the markup ships the
+  // production URL and the client corrects it once it knows where it is actually running.
+  const [href, setHref] = useState(() => productionUrl(site));
+  useEffect(() => setHref(siteUrl(site)), [site]);
 
   const onMove = (event: { clientX: number; clientY: number }) => {
     const rect = scene.current?.getBoundingClientRect();
