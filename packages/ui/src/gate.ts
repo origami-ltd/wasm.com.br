@@ -14,6 +14,8 @@ export interface GateCapability {
   label: string;
   ok: boolean;
   detail: string;
+  /** Optional citation for the requirement, rendered after the detail. */
+  source?: { label: string; href: string };
 }
 
 export interface GateOptions {
@@ -47,7 +49,9 @@ function requirements(capabilities: GateCapability[]): string {
     <li class="${capability.ok ? "ogx-req-ok" : "ogx-req-missing"}">
       <span class="ogx-req-mark" aria-hidden="true">${capability.ok ? "✓" : "✗"}</span>
       <span class="ogx-req-label">${escape(capability.label)}
-        <span class="ogx-req-detail">${escape(capability.detail)}</span>
+        <span class="ogx-req-detail">${escape(capability.detail)}${capability.source ? `
+          <a href="${escape(capability.source.href)}" target="_blank" rel="noopener"
+             class="underline decoration-dotted underline-offset-2">${escape(capability.source.label)}</a>` : ""}</span>
       </span>
     </li>`).join("");
   return `<ul class="ogx-req">${rows}</ul>`;

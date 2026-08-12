@@ -17,6 +17,8 @@ export interface Capability {
   ok: boolean;
   /** Why it matters, shown when it is missing. */
   detail: string;
+  /** Where to read about the requirement itself, when a spec page says it better than we can. */
+  source?: { label: string; href: string };
 }
 
 function hasWebGl2(): boolean {
@@ -64,6 +66,10 @@ export function checkCapabilities(gpu: GpuKind, heapBytes?: number): Capability[
       detail:
         "Game archives are read synchronously from a background thread, which needs SharedArrayBuffer. "
         + "It is only available over https:// on a cross-origin-isolated page.",
+      source: {
+        label: "SharedArrayBuffer on MDN",
+        href: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer",
+      },
     },
     {
       key: "folders",
