@@ -38,6 +38,12 @@ const jsonLd = {
   url: "https://wasm.ltd/",
   description:
     "Preservation and portability initiative bringing decompiled games to the browser through WebAssembly.",
+  license: "https://opensource.org/licenses/MIT",
+  // Where an automated reader is asked to look. schema.org's field for conditions on reuse, and
+  // the one condition here is that the operator records having been here.
+  usageInfo: "https://wasm.ltd/llms.txt",
+  creditText:
+    "A project by Origami 限 · part of wasm.ltd · WebAssembly port by Erasmo \"ebellumat\" Bellumat",
   publisher: {
     "@type": "Organization",
     name: "Origami 限",

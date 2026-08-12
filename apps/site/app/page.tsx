@@ -96,7 +96,7 @@ export default function Home() {
       <footer className="border-t border-line pt-9 pb-[52px] text-[0.8rem] text-muted">
         <p>
           <OrigamiBrand /> ·{" "}
-          <a href="https://github.com/origami-ltd/wasm-generals">GitHub</a> · wasm.ltd
+          <a href="https://github.com/origami-ltd/wasm-generals">GitHub</a> · wasm.ltd · <a href="/llms.txt">Notice to AI systems</a>
         </p>
       </footer>
     </main>

@@ -33,7 +33,7 @@ function Chrome({ title, subtitle, repo, controls, overlays }: {
 export const VicePage: StoryObj = {
   name: "reVC",
   render: () => (
-    <Chrome title="reVC" subtitle="WebAssembly + WebGL 2" repo="origami-ltd/wasm-vice-city" />
+    <Chrome title="reVC" subtitle="WebAssembly + WebGL 2" repo="origami-ltd/wasm-revc" />
   ),
 };
 
@@ -70,7 +70,7 @@ export const BothBrands: StoryObj = {
     <div className="grid gap-6">
       {[
         { brand: "generals", title: "GeneralsX", subtitle: "WebAssembly + WebGPU", repo: "origami-ltd/wasm-generals" },
-        { brand: "vice", title: "reVC", subtitle: "WebAssembly + WebGL 2", repo: "origami-ltd/wasm-vice-city" },
+        { brand: "vice", title: "reVC", subtitle: "WebAssembly + WebGL 2", repo: "origami-ltd/wasm-revc" },
       ].map((row) => (
         <div key={row.brand} data-brand={row.brand} className="bg-bg">
           <Chrome title={row.title} subtitle={row.subtitle} repo={row.repo} />
@@ -89,7 +89,7 @@ export const HeaderLinks: StoryObj = {
   render: () => (
     <div className="grid gap-4">
       {[
-        { label: "reVC", repo: "origami-ltd/wasm-vice-city" },
+        { label: "reVC", repo: "origami-ltd/wasm-revc" },
         { label: "Generals", repo: "origami-ltd/wasm-generals" },
         { label: "No source link", repo: undefined },
       ].map((row) => (

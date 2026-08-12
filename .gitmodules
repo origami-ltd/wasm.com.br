@@ -3,4 +3,4 @@
 	url = https://github.com/origami-ltd/wasm-generals.git
 [submodule "games/wasm-vice-city"]
 	path = games/wasm-vice-city
-	url = https://github.com/origami-ltd/wasm-vice-city.git
+	url = https://github.com/origami-ltd/wasm-revc.git
