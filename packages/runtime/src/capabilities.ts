@@ -12,7 +12,7 @@
 export type GpuKind = "webgpu" | "webgl2";
 
 export interface Capability {
-  key: "wasm" | "isolation" | "folders" | "gpu";
+  key: "wasm" | "isolation" | "folders" | "gpu" | "memory";
   label: string;
   ok: boolean;
   /** Why it matters, shown when it is missing. */
@@ -27,7 +27,29 @@ function hasWebGl2(): boolean {
   }
 }
 
-export function checkCapabilities(gpu: GpuKind): Capability[] {
+/**
+ * Can this browser actually hand over the heap the engine reserves?
+ *
+ * Both engines take their memory up-front and cannot grow (growth detaches WebGL's typed-array
+ * views), so the allocation either succeeds at startup or the page dies. Desktop browsers hand
+ * over a gigabyte or two without complaint; iOS Safari has a much lower per-tab ceiling, and
+ * what the player saw was a tab that simply disappeared partway through loading.
+ *
+ * A WebAssembly.Memory with initial === maximum reserves the same way the engine's will, so this
+ * fails here, before a gigabyte of game data has been read, instead of there.
+ */
+function canReserveHeap(bytes: number): boolean {
+  const pages = Math.ceil(bytes / 65536);
+  try {
+    // eslint-disable-next-line no-new
+    new WebAssembly.Memory({ initial: pages, maximum: pages });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function checkCapabilities(gpu: GpuKind, heapBytes?: number): Capability[] {
   return [
     {
       key: "wasm",
@@ -54,6 +76,15 @@ export function checkCapabilities(gpu: GpuKind): Capability[] {
         "Your own installed copy is read straight off your disk and never uploaded. Chromium "
         + "browsers open a folder picker; elsewhere, including iOS, the file chooser is used.",
     },
+    ...(heapBytes === undefined ? [] : [{
+      key: "memory" as const,
+      label: `${Math.round(heapBytes / 2 ** 30 * 10) / 10} GB of memory`,
+      ok: canReserveHeap(heapBytes),
+      detail:
+        "The engine reserves its heap up front and cannot grow it later, so the whole amount has "
+        + "to be available when the page starts. Desktop browsers allow this; iPhones and iPads "
+        + "cap a tab well below it.",
+    }]),
     {
       key: "gpu",
       label: gpu === "webgpu" ? "WebGPU" : "WebGL 2",

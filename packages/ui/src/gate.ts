@@ -58,8 +58,9 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
   const blocked = missing.length > 0;
 
   const advice = options.handheld
-    ? `Phones and tablets can pick the game files, but not give the renderer the memory a full
-       city needs — open <strong>wasm.com.br</strong> on a computer.`
+    ? `Check the list below. Picking the game files works here, but these are full desktop
+       builds: they reserve their memory up front, and they are played with a keyboard and mouse
+       or a connected controller — there are no touch controls.`
     : `Check the list below for what this browser is missing.`;
 
   host.className = "ogx-gate";

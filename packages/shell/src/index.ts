@@ -31,6 +31,8 @@ export interface ShellOptions extends ChromeOptions {
   game: string;
   /** Which GPU API the engine needs, for the capability check. */
   gpu: GpuKind;
+  /** What the engine reserves up front (-sINITIAL_MEMORY). Checked before a byte is downloaded. */
+  heapBytes?: number;
   /** Where to find the install, shown in the gate. Raw HTML. */
   help: string;
   /** Host log sink. Omit on static hosting and nothing is shipped. */
@@ -78,7 +80,7 @@ export function createShell(options: ShellOptions): Shell {
   if (options.pointer) mountPointer(options.pointer);
   if (options.frame) watchStall({ frame: options.frame, log });
 
-  const capabilities = checkCapabilities(options.gpu);
+  const capabilities = checkCapabilities(options.gpu, options.heapBytes);
   const gate = mountGate(el("firstrun"), {
     game: options.game,
     help: options.help,
