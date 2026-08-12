@@ -92,11 +92,15 @@ export function render(root: HTMLElement, options: ChromeOptions): void {
         </div>
       </section>
 
+      <!-- The canvas and the Play overlay take the page background, not black. Before the engine
+           runs the canvas sits at its default 300x150, and a black rectangle is invisible on a
+           near-black brand and an obvious box on a purple one. Once the game is running it paints
+           every pixel itself, so this colour is never seen again. -->
       <div id="stage" class="grid min-h-0 w-full min-w-0 flex-1 place-items-center overflow-hidden">
         <section id="frame" class="ogx-panel relative grid min-w-0 place-items-center p-2" style="--ogx-panel-surface: var(--bg)">
-          <canvas id="canvas" tabindex="0" class="block border-0 bg-black"></canvas>
+          <canvas id="canvas" tabindex="0" class="block border-0 bg-bg"></canvas>
 
-          <button id="play" hidden class="absolute inset-0 z-[7] grid place-items-center bg-bg/90 text-accent">
+          <button id="play" hidden class="absolute inset-0 z-[7] grid place-items-center bg-bg text-accent">
             <span class="ogx-panel px-10 py-5 text-2xl uppercase tracking-[0.2em]"
                   style="--ogx-panel-surface: var(--raised)">Play</span>
           </button>
