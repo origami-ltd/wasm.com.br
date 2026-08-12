@@ -153,23 +153,6 @@ export function createShell(options: ShellOptions): Shell {
     capabilities,
     handheld: isHandheld(),
     pickerId: `${options.key}-install`,
-    resume: options.resumeSaved && (async () => {
-      // ?assets=1 exists precisely to choose a *different* install, so reopening the remembered
-      // one would defeat it — go straight to the picker.
-      if (query.pickInstall) return false;
-      try {
-        const root = await options.resumeSaved!();
-        if (!root) return false;
-        await use(root);
-        return true;
-      } catch (error) {
-        // The folder is gone, empty, or was never a game. Forget it rather than trapping the
-        // player in a saved choice they cannot get out of, and fall through to the picker.
-        log(`Saved folder is no longer usable (${(error as Error).message}); asking again.`);
-        await options.forgetSaved?.();
-        return false;
-      }
-    }),
     onPick: async (root) => {
       const problem = await options.onPick(root);
       if (problem) return problem; // nothing was saved: the player can simply pick again

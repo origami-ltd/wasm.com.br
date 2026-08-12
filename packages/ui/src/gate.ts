@@ -32,15 +32,6 @@ export interface GateOptions {
   pickerId: string;
   /** Resolve to an error message to display, or undefined when the pick was good. */
   onPick: (root: FileSystemDirectoryHandle) => Promise<string | undefined>;
-  /**
-   * Re-open the folder the player chose last time, asking for permission.
-   *
-   * Called from the button's own click handler, because that is the only place a user gesture
-   * exists — requestPermission is refused without one, which is why a remembered folder still had
-   * to be picked again on every single visit. Returns undefined when there is nothing saved or the
-   * player declines, and the picker opens as usual.
-   */
-  resume?: () => Promise<boolean>;
 }
 
 export interface Gate {
@@ -249,26 +240,10 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
   });
 
   find("pick")?.addEventListener("click", async () => {
-    // A remembered folder beats asking again. This runs inside the click, so the permission
-    // prompt is allowed; for a folder already granted once, browsers re-grant it silently.
-    //
-    // It must never be able to prevent picking. On a browser with no File System Access API the
-    // lookup can simply never settle, and this button is the only way in — so it races a timeout
-    // and any outcome other than a clean success falls through to the picker.
-    if (options.resume) {
-      setNote("Reopening your game folder…");
-      try {
-        const resumed = await Promise.race([
-          options.resume(),
-          new Promise<false>((resolve) => setTimeout(() => resolve(false), 3000)),
-        ]);
-        if (resumed) return;
-      } catch (error) {
-        console.debug("could not resume the saved folder", error);
-      }
-      setNote("");
-    }
-
+    // No resuming here. This button says "select", so it selects — reopening the remembered
+    // folder instead made it impossible to choose a different one, and on a browser where the
+    // lookup never settled it locked the gate outright. Resuming happens on Play, where it is
+    // what the player asked for.
     const picker = (window as unknown as {
       showDirectoryPicker?: (o: object) => Promise<FileSystemDirectoryHandle>;
     }).showDirectoryPicker;
