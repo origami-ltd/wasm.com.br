@@ -5,6 +5,7 @@ export { directoryFromFiles, hasDirectoryPicker } from "./filelist";
 export { ARCHIVE_EXTENSIONS, archiveKind, extractInto, readArchive, readIso, readZip } from "./archives";
 export type { ArchiveFile, ArchiveKind } from "./archives";
 export type { FileListDirectoryHandle, FileListFileHandle } from "./filelist";
+export { mountPersistent } from "./saves";
 export { checkCapabilities, allSupported, isHandheld } from "./capabilities";
 export type { Capability, GpuKind } from "./capabilities";
 export type { EmscriptenFS, EmscriptenModule, FSNode, FSStream, ModuleFactory } from "./types";

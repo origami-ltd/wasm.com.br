@@ -46,6 +46,17 @@ export function mountDisplay(options: DisplayOptions = {}): { fit: () => void } 
     canvas.style.height = `${Math.max(1, Math.floor((canvas.height || 1) * scale))}px`;
   };
 
+  // Hand the canvas the keyboard as soon as the engine is up. Play hides itself on the click that
+  // starts the game, which leaves focus on nothing: the page keeps space and the arrow keys and
+  // scrolls with them instead of passing them on. Both ports mark the frame ready from
+  // onRuntimeInitialized, so that is the one moment shared by both.
+  const ready = new MutationObserver(() => {
+    if (frame.dataset.ready !== "true") return;
+    ready.disconnect();
+    canvas.focus({ preventScroll: true });
+  });
+  ready.observe(frame, { attributes: true, attributeFilter: ["data-ready"] });
+
   new ResizeObserver(fit).observe(stage);
   // The engine resizes its own canvas; nothing else tells us when.
   new MutationObserver(fit).observe(canvas, { attributes: true, attributeFilter: ["width", "height"] });

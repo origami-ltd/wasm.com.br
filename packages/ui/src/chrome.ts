@@ -98,7 +98,10 @@ export function render(root: HTMLElement, options: ChromeOptions): void {
            every pixel itself, so this colour is never seen again. -->
       <div id="stage" class="grid min-h-0 w-full min-w-0 flex-1 place-items-center overflow-hidden">
         <section id="frame" class="ogx-panel relative grid min-w-0 place-items-center p-2" style="--ogx-panel-surface: var(--bg)">
-          <canvas id="canvas" tabindex="0" class="block border-0 bg-bg"></canvas>
+          <!-- Focusable so the keyboard reaches the game, but with no focus ring: it is focused
+               the moment the engine starts and stays that way, so the ring is permanent furniture
+               rather than a hint - and in fullscreen it draws a box around the whole picture. -->
+          <canvas id="canvas" tabindex="0" class="block border-0 bg-bg outline-none"></canvas>
 
           <button id="play" hidden class="absolute inset-0 z-[7] grid place-items-center bg-bg text-accent">
             <span class="ogx-panel px-10 py-5 text-2xl uppercase tracking-[0.2em]"
