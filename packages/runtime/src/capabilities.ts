@@ -2,9 +2,11 @@
  * What this browser can and cannot do, checked before the page pretends to be usable.
  *
  * Both ports need the same four things, and when one is missing the honest move is to say which
- * — not to render a folder picker whose button cannot work. iOS is the case that forces this:
- * every iOS browser is WebKit, and WebKit has no File System Access API at all, so there is no
- * way to point the page at a game folder however the button is styled.
+ * — not to render a button that cannot work.
+ *
+ * Reading the game files is deliberately not tied to the File System Access API. That is
+ * Chromium-only, and every WebKit and Gecko browser can still hand over the same files through a
+ * file input, so gating on the picker would turn away browsers that run the game perfectly well.
  */
 
 export type GpuKind = "webgpu" | "webgl2";
@@ -44,11 +46,13 @@ export function checkCapabilities(gpu: GpuKind): Capability[] {
     {
       key: "folders",
       label: "Folder access",
-      ok: typeof (window as { showDirectoryPicker?: unknown }).showDirectoryPicker === "function",
+      // Not the directory picker: that is Chromium-only, and a plain file input reaches the same
+      // files everywhere else, iOS included. Blocking on the picker turned every non-Chromium
+      // browser away from a page they can actually run.
+      ok: typeof File === "function" && typeof FileList === "function",
       detail:
-        "Your own installed copy is read straight off your disk through the File System Access API. "
-        + "Chrome, Edge and other Chromium browsers on desktop support it; Safari and Firefox do not, "
-        + "and no browser on iOS or iPadOS does.",
+        "Your own installed copy is read straight off your disk and never uploaded. Chromium "
+        + "browsers open a folder picker; elsewhere, including iOS, the file chooser is used.",
     },
     {
       key: "gpu",

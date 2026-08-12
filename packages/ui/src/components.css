@@ -358,7 +358,10 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 16px;
-  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  /* No scrim. A near-opaque fill over the viewport hid the whole page behind the card, which
+     read as the page having failed to load rather than as a dialog waiting on input. The card
+     is opaque and centred, so it stands out on its own. */
+  pointer-events: none;
   /* Phones put a toolbar over the bottom of the viewport; keep the last button reachable. */
   padding-bottom: max(16px, env(safe-area-inset-bottom));
 }
@@ -368,6 +371,7 @@
 }
 
 .ogx-gate-card {
+  pointer-events: auto;   /* the host ignores clicks so the page stays usable around the card */
   width: 100%;
   max-width: 720px;
   padding: 20px;

@@ -1,3 +1,4 @@
+import { directoryFromFiles } from "@wasm/runtime";
 /**
  * The first-run gate: "point me at your copy of the game".
  *
@@ -57,9 +58,9 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
   const blocked = missing.length > 0;
 
   const advice = options.handheld
-    ? `This is a desktop-only game page. Phones and tablets cannot read a game folder or give the
-       renderer the memory it needs — open <strong>wasm.com.br</strong> on a computer.`
-    : `Open this page in <strong>Chrome</strong> or <strong>Edge</strong> on a desktop.`;
+    ? `Phones and tablets can pick the game files, but not give the renderer the memory a full
+       city needs — open <strong>wasm.com.br</strong> on a computer.`
+    : `Check the list below for what this browser is missing.`;
 
   host.className = "ogx-gate";
   host.hidden = true;
@@ -91,6 +92,7 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
             Point the browser at your installed copy. The files stay on your machine.
           </p>
           <button type="button" data-gate="pick" class="ogx-hud-button mt-3 w-full sm:w-auto">Select game folder</button>
+          <input type="file" data-gate="files" multiple webkitdirectory directory hidden>
           <p data-gate="note" class="mt-2 min-h-4 text-xs leading-relaxed text-signal"></p>
         </div>
         <div data-gate="help" hidden
@@ -107,20 +109,46 @@ export function mountGate(host: HTMLElement, options: GateOptions): Gate {
     if (help) help.hidden = !help.hidden;
   });
 
-  find("pick")?.addEventListener("click", async () => {
+  const setNote = (text: string) => {
     const note = find("note");
+    if (note) note.textContent = text;
+  };
+
+  const deliver = async (root: FileSystemDirectoryHandle) => {
+    setNote("Scanning…");
+    setNote((await options.onPick(root)) ?? "Install found. Starting…");
+  };
+
+  // Fallback path: Firefox, Safari and everything on iOS have no directory picker, so the file
+  // input is the only way in. directoryFromFiles gives the selection the same shape the picker
+  // would have returned, which keeps onPick unaware of which one the browser used.
+  const input = find("files") as HTMLInputElement | null;
+  input?.addEventListener("change", async () => {
+    const files = Array.from(input.files ?? []);
+    if (files.length === 0) return;
+    try {
+      await deliver(directoryFromFiles(files) as unknown as FileSystemDirectoryHandle);
+    } catch (error) {
+      console.debug("folder selection failed", error);
+      setNote("Could not read that selection.");
+    }
+  });
+
+  find("pick")?.addEventListener("click", async () => {
     const picker = (window as unknown as {
       showDirectoryPicker?: (o: object) => Promise<FileSystemDirectoryHandle>;
     }).showDirectoryPicker;
-    if (!picker) return; // capability check already covered this
+
+    if (!picker) {
+      input?.click();
+      return;
+    }
+
     try {
-      const root = await picker({ id: options.pickerId, mode: "read" });
-      if (note) note.textContent = "Scanning…";
-      const error = await options.onPick(root);
-      if (note) note.textContent = error ?? "Install found. Starting…";
+      await deliver(await picker({ id: options.pickerId, mode: "read" }));
     } catch (error) {
       console.debug("folder selection cancelled", error);
-      if (note) note.textContent = "";
+      setNote("");
     }
   });
 
