@@ -80,8 +80,8 @@ test("the row lands in the table, not at the end of the file", () => {
 });
 
 test("an endpoint acts only for a licence that names it", () => {
-  const licence = "PROVENANCE ENDPOINT: https://generals.wasm.com.br/api/proof-of-usage";
-  assert.ok(namesEndpoint(licence, "https://generals.wasm.com.br/api/proof-of-usage"));
-  assert.ok(namesEndpoint(licence, "http://generals.wasm.com.br/api/proof-of-usage/"));
-  assert.equal(namesEndpoint(licence, "https://wasm.com.br/api/proof-of-usage"), false);
+  const licence = "PROVENANCE ENDPOINT: https://generals.wasm.ltd/api/proof-of-usage";
+  assert.ok(namesEndpoint(licence, "https://generals.wasm.ltd/api/proof-of-usage"));
+  assert.ok(namesEndpoint(licence, "http://generals.wasm.ltd/api/proof-of-usage/"));
+  assert.equal(namesEndpoint(licence, "https://wasm.ltd/api/proof-of-usage"), false);
 });

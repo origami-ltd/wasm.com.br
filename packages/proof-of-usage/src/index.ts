@@ -16,7 +16,7 @@
  * merge or close: the row lands when a maintainer says so, not when a system submits it. The same
  * record submitted twice finds its own hash and answers with the pull request that already exists.
  *
- * Each site deploys its own copy — wasm.com.br, generals.wasm.com.br, vicecity — and each serves
+ * Each site deploys its own copy — wasm.ltd, generals.wasm.ltd, revc.wasm.ltd — and each serves
  * only the repositories whose LICENSE.md names that site's endpoint. That is the whole
  * authorisation model: a project asks for this by writing the URL into its own licence, and an
  * endpoint that opened pull requests on repositories which had not asked would be a spam engine
@@ -168,7 +168,7 @@ export function insertRow(file: string, row: string) {
 
 /**
  * Whether a licence's "PROVENANCE ENDPOINT:" line names this endpoint. Compared whole, not by
- * substring: generals.wasm.com.br ends with wasm.com.br, and one site's licence must not authorise
+ * substring: generals.wasm.ltd ends with wasm.ltd, and one site's licence must not authorise
  * another site's endpoint by accident of spelling.
  */
 export function namesEndpoint(licence: string, endpoint: string) {
