@@ -9,6 +9,7 @@ import {
   parseRepo,
   provenanceHash,
   readRecord,
+  handleProofOfUsage,
 } from "../src/index.js";
 
 // node --test test/proof-of-usage.test.js
@@ -84,4 +85,41 @@ test("an endpoint acts only for a licence that names it", () => {
   assert.ok(namesEndpoint(licence, "https://generals.wasm.ltd/api/proof-of-usage"));
   assert.ok(namesEndpoint(licence, "http://generals.wasm.ltd/api/proof-of-usage/"));
   assert.equal(namesEndpoint(licence, "https://wasm.ltd/api/proof-of-usage"), false);
+});
+
+test("every request leaves one line behind, refused ones included", async () => {
+  const lines = [];
+  const log = console.log;
+  console.log = (line) => lines.push(line);
+  try {
+    const request = new Request("https://generals.wasm.ltd/api/proof-of-usage", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-real-ip": "140.82.121.4",
+        "user-agent": "SomeCrawler/1.0",
+        authorization: "Bearer hunter2",
+        "x-vercel-ip-country": "US",
+        "x-vercel-ip-city": "San%20Francisco",
+      },
+      body: "this is not json",
+    });
+    process.env.PROOF_OF_USAGE_GITHUB_TOKEN = "not-a-real-token";
+    const result = await handleProofOfUsage(request);
+    assert.equal(result.status, 400);
+
+    assert.equal(lines.length, 1);
+    const entry = JSON.parse(lines[0]);
+    assert.equal(entry.event, "proof-of-usage.request");
+    assert.equal(entry.status, 400);
+    assert.equal(entry.raw, "this is not json");
+    assert.equal(entry.caller.ip, "140.82.121.4");
+    assert.equal(entry.caller.userAgent, "SomeCrawler/1.0");
+    assert.equal(entry.caller.geo.city, "San Francisco");
+    assert.equal(entry.caller.headers.authorization, "[redacted]");
+    assert.ok(Array.isArray(entry.caller.hostnames));
+  } finally {
+    console.log = log;
+    delete process.env.PROOF_OF_USAGE_GITHUB_TOKEN;
+  }
 });

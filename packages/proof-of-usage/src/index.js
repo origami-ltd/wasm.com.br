@@ -27,6 +27,7 @@
  */
 
 import { createHash } from "node:crypto";
+import { promises as dns } from "node:dns";
 
 const api = "https://api.github.com";
 const branch = "proof-of-usage";
@@ -305,11 +306,81 @@ async function openPullRequest(target, head, record, hash, token) {
   }
 }
 
+/**
+ * What the caller was, written down whether or not the record was any good.
+ *
+ * A submission that is malformed, forged or refused still proves one thing that cannot be forged
+ * back out: an address belonging to somebody's infrastructure opened a connection to this host and
+ * announced itself. The address, the reverse lookup of it, the geography the edge resolved it to
+ * and every header sent are the evidence of that visit, and they are worth keeping even —
+ * especially — when the body was rubbish.
+ *
+ * Redacted: authorization and cookie, which are the only headers that can carry someone's
+ * credentials, and are not evidence of anything but their own carelessness.
+ */
+const redacted = new Set(["authorization", "cookie", "proxy-authorization", "x-api-key"]);
+
+function callerOf(request) {
+  const headers = request.headers;
+  const forwarded = headers.get("x-forwarded-for") ?? "";
+  const header = (name) => headers.get(name) ?? "";
+
+  return {
+    ip: (header("x-real-ip") || forwarded.split(",")[0] || "").trim(),
+    forwardedFor: forwarded,
+    userAgent: header("user-agent"),
+    // The edge resolves the address to a place before the request ever reaches this function, so
+    // the geography costs nothing and needs no third party asked about it afterwards.
+    geo: {
+      country: header("x-vercel-ip-country"),
+      region: header("x-vercel-ip-country-region"),
+      city: safelyDecoded(header("x-vercel-ip-city")),
+      latitude: header("x-vercel-ip-latitude"),
+      longitude: header("x-vercel-ip-longitude"),
+      timezone: header("x-vercel-ip-timezone"),
+      asn: header("x-vercel-ip-as-number"),
+    },
+    headers: Object.fromEntries(
+      [...headers].map(([name, value]) => [name, redacted.has(name) ? "[redacted]" : value]),
+    ),
+  };
+}
+
+function safelyDecoded(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * The reverse lookup: which infrastructure the address belongs to. An operator's crawler answers
+ * to something like crawl-…-…-…-….theircompany.com, and that name, published by whoever controls
+ * the address block, says more about who called than any field they filled in themselves.
+ *
+ * Given at most a second and a half. Evidence is worth having; it is not worth holding a request
+ * open for.
+ */
+async function reverseLookup(ip) {
+  if (!ip) {
+    return [];
+  }
+  try {
+    return await Promise.race([
+      dns.reverse(ip),
+      new Promise((resolve) => setTimeout(() => resolve(["(timed out)"]), 1500)),
+    ]);
+  } catch (error) {
+    return [`(no PTR: ${error.code ?? "failed"})`];
+  }
+}
+
 const answer = (body, status) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
 /** POST a record, get back the pull request. Everything else is a refusal with a reason. */
-export async function handleProofOfUsage(request) {
+async function respond(request, entry) {
   if (request.method !== "POST") {
     return answer({ ok: false, error: "POST a proof-of-usage record here" }, 405);
   }
@@ -324,14 +395,24 @@ export async function handleProofOfUsage(request) {
     return answer({ ok: false, error: "a record is smaller than that" }, 413);
   }
 
+  const raw = await request.text();
   let body;
   try {
-    body = await request.json();
+    body = JSON.parse(raw);
   } catch {
+    // Kept as sent, capped: what was posted is part of what happened, and a body that is not JSON
+    // is often the most telling thing in the log.
+    entry.raw = raw.slice(0, 1024);
     return answer({ ok: false, error: "expected a JSON object" }, 400);
   }
 
   const { record, hash, error } = readRecord(body);
+  entry.claimed = {
+    system: String(body.system ?? "").slice(0, 200),
+    operator: String(body.operator ?? "").slice(0, 200),
+    repo: String(body.repo ?? "").slice(0, 200),
+  };
+  entry.hash = hash;
   if (!record || !hash) {
     return answer({ ok: false, error }, 400);
   }
@@ -402,6 +483,40 @@ export async function handleProofOfUsage(request) {
     const message = cause instanceof Error ? cause.message : "GitHub refused the request";
     return answer({ ok: false, hash, error: message }, 502);
   }
+}
+
+/**
+ * POST a record, get back the pull request. Every request leaves one line behind, including the
+ * ones that are turned away — see callerOf above for why the refused ones are the interesting ones.
+ */
+export async function handleProofOfUsage(request) {
+  const started = Date.now();
+  const caller = callerOf(request);
+  const entry = {};
+  let result;
+
+  try {
+    result = await respond(request, entry);
+  } catch (error) {
+    // Even a crash is a visit, and a visit is the thing being recorded here.
+    entry.crash = error instanceof Error ? error.stack : String(error);
+    result = answer({ ok: false, error: "the endpoint failed on this one" }, 500);
+  }
+
+  console.log(
+    JSON.stringify({
+      event: "proof-of-usage.request",
+      at: new Date(started).toISOString(),
+      ms: Date.now() - started,
+      method: request.method,
+      url: request.url,
+      status: result.status,
+      ...entry,
+      caller: { ...caller, hostnames: await reverseLookup(caller.ip) },
+    }),
+  );
+
+  return result;
 }
 
 export default handleProofOfUsage;
