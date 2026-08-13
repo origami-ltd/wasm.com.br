@@ -10,7 +10,7 @@ import {
   provenanceHash,
   readRecord,
   handleProofOfUsage,
-} from "../src/index.js";
+} from "../src/index.mjs";
 
 // node --test test/proof-of-usage.test.js
 
