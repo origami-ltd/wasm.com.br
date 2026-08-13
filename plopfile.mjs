@@ -160,6 +160,22 @@ export default function plop(plop) {
         templateFile: "templates/validate-proof-of-usage.yml.hbs",
         force: true,
       },
+      // The same paperwork in a shape a tool can read: where the record file is, on which branch,
+      // and where a record can be sent by a system that cannot open a pull request. Prose says all
+      // of this too, in four files, and none of it is parseable.
+      {
+        type: "add",
+        path: "games/{{slug}}/proof-of-usage.json",
+        templateFile: "templates/proof-of-usage.json.hbs",
+        force: true,
+      },
+      {
+        type: "add",
+        path: "games/{{slug}}/web/public/.well-known/proof-of-usage.json",
+        templateFile: "templates/proof-of-usage.json.hbs",
+        force: true,
+      },
+
       // Everything an automated reader sees. The page's own metadata, the file it is pointed at,
       // and the two files a crawler looks for before anything else.
       {
@@ -237,6 +253,12 @@ export default function plop(plop) {
         type: "add",
         path: "{{path}}/PROOF_OF_USAGE.md",
         templateFile: "templates/PROOF_OF_USAGE.md.hbs",
+        force: true,
+      },
+      {
+        type: "add",
+        path: "{{path}}/proof-of-usage.json",
+        templateFile: "templates/proof-of-usage.json.hbs",
         force: true,
       },
       {

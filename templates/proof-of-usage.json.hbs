@@ -1,0 +1,15 @@
+{
+  "pou": "1.0",
+  "work": "https://github.com/origami-ltd/{{slug}}",
+  "record": {
+    "path": "PROOF_OF_USAGE.md",
+    "branch": "proof-of-usage",
+    "format": "markdown"
+  },
+  "transports": [
+    { "type": "pull_request" }{{#if subdomain}},
+    { "type": "endpoint", "url": "https://{{subdomain}}.wasm.ltd/api/proof-of-usage" }{{/if}}
+  ],
+  "contact": "lbj.erasmo@gmail.com",
+  "basis": "licence"
+}
