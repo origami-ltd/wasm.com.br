@@ -37,32 +37,16 @@ const mail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const address = /^https?:\/\/\S+$/;
 const digest = /^[0-9a-f]{64}$/;
 
-export type UsageRecord = {
-  system: string;
-  operator: string;
-  date: string;
-  what: string;
-  purpose: string;
-  contact: string;
-  repo: { owner: string; name: string; url: string };
-};
-
-type Repository = { owner: string; name: string };
-const slug = (repo: Repository) => `${repo.owner}/${repo.name}`;
+const slug = (repo) => `${repo.owner}/${repo.name}`;
 
 /** SHA-256("SystemName:OperatorName:ISODate:TargetRepositoryURL"), lowercase hex. */
-export function provenanceHash(
-  system: string,
-  operator: string,
-  date: string,
-  repo: string,
-) {
+export function provenanceHash(system, operator, date, repo) {
   const payload = [system, operator, date, repo].map((v) => v.trim()).join(":");
   return createHash("sha256").update(payload, "utf8").digest("hex");
 }
 
 /** Canonical https://github.com/owner/name — the exact string a repository's own workflow hashes. */
-export function parseRepo(value: unknown) {
+export function parseRepo(value) {
   if (typeof value !== "string") {
     return null;
   }
@@ -80,7 +64,7 @@ export function parseRepo(value: unknown) {
   return { owner, name, url: `https://github.com/${owner}/${name}` };
 }
 
-function field(value: unknown, max: number) {
+function field(value, max) {
   // A pipe or a newline in a cell is a second row: the table is the record, so neither is a field.
   if (typeof value !== "string") {
     return "";
@@ -90,15 +74,13 @@ function field(value: unknown, max: number) {
 }
 
 /** Either the record as it will be written, or the first thing wrong with it. */
-export function readRecord(
-  body: Record<string, unknown>,
-): { record?: UsageRecord; hash?: string; error?: string } {
+export function readRecord(body) {
   const repo = parseRepo(body.repo);
   if (!repo) {
     return { error: "repo must be a https://github.com/owner/name URL" };
   }
 
-  const record: UsageRecord = {
+  const record = {
     system: field(body.system, 200),
     operator: field(body.operator, 200),
     date: field(body.date, 40),
@@ -131,7 +113,7 @@ export function readRecord(
   return { record, hash };
 }
 
-export function buildRow(record: UsageRecord, hash: string) {
+export function buildRow(record, hash) {
   const cells = [
     record.system,
     record.operator,
@@ -144,13 +126,13 @@ export function buildRow(record: UsageRecord, hash: string) {
   return `| ${cells.join(" | ")} |`;
 }
 
-export const alreadyRecorded = (file: string, hash: string) => file.includes(hash);
+export const alreadyRecorded = (file, hash) => file.includes(hash);
 
 /**
  * After the last row of the record table, not at the end of the file — the field reference and the
  * handshake notes come after the table, and a row appended past them is not in the table at all.
  */
-export function insertRow(file: string, row: string) {
+export function insertRow(file, row) {
   const lines = file.split("\n");
   const separator = lines.findIndex((line) => /^\|[\s:|-]+\|$/.test(line.trim()));
   if (separator === -1) {
@@ -171,23 +153,21 @@ export function insertRow(file: string, row: string) {
  * substring: generals.wasm.ltd ends with wasm.ltd, and one site's licence must not authorise
  * another site's endpoint by accident of spelling.
  */
-export function namesEndpoint(licence: string, endpoint: string) {
-  const bare = (url: string) =>
+export function namesEndpoint(licence, endpoint) {
+  const bare = (url) =>
     url.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/+$/, "");
   const declared = licence.match(/PROVENANCE ENDPOINT:\s*(\S+)/i)?.[1];
   return declared !== undefined && bare(declared) === bare(endpoint);
 }
 
 class GithubError extends Error {
-  status: number;
-
-  constructor(status: number, message: string) {
+  constructor(status, message) {
     super(message);
     this.status = status;
   }
 }
 
-async function github(path: string, token: string, init: RequestInit = {}) {
+async function github(path, token, init = {}) {
   const result = await fetch(`${api}${path}`, {
     ...init,
     headers: {
@@ -204,31 +184,25 @@ async function github(path: string, token: string, init: RequestInit = {}) {
   if (!result.ok) {
     throw new GithubError(
       result.status,
-      typeof (body as { message?: unknown }).message === "string"
-        ? (body as { message: string }).message
-        : `GitHub returned ${result.status}`,
+      typeof body.message === "string" ? body.message : `GitHub returned ${result.status}`,
     );
   }
-  return body as Record<string, unknown>;
+  return body;
 }
 
-const decode = (file: Record<string, unknown>) =>
-  Buffer.from(file.content as string, "base64").toString("utf8");
+const decode = (file) => Buffer.from(file.content, "base64").toString("utf8");
 
 /**
  * The branch is always cut in our own fork, never in the repository being recorded — even where
  * the credentials would allow the latter. A project that carries this licence gets pull requests
  * to read and merge, and nothing else: no branches, no commits, no writes it did not accept.
  */
-async function forkOf(target: Repository, token: string): Promise<Repository> {
+async function forkOf(target, token) {
   const fork = await github(`/repos/${slug(target)}/forks`, token, {
     method: "POST",
     body: JSON.stringify({ default_branch_only: false }),
   });
-  const head = {
-    owner: (fork.owner as { login: string }).login,
-    name: fork.name as string,
-  };
+  const head = { owner: fork.owner.login, name: fork.name };
   if (slug(head) === slug(target)) {
     throw new GithubError(422, "this endpoint's account owns that repository, so it cannot fork it");
   }
@@ -240,7 +214,7 @@ async function forkOf(target: Repository, token: string): Promise<Repository> {
       const upstream = await github(`/repos/${slug(target)}/git/ref/heads/${branch}`, token);
       await github(`/repos/${slug(head)}/git/refs/heads/${branch}`, token, {
         method: "PATCH",
-        body: JSON.stringify({ sha: (upstream.object as { sha: string }).sha, force: true }),
+        body: JSON.stringify({ sha: upstream.object.sha, force: true }),
       });
       return head;
     } catch (error) {
@@ -253,13 +227,7 @@ async function forkOf(target: Repository, token: string): Promise<Repository> {
   return head;
 }
 
-async function openPullRequest(
-  target: Repository,
-  head: Repository,
-  record: UsageRecord,
-  hash: string,
-  token: string,
-) {
+async function openPullRequest(target, head, record, hash, token) {
   const work = `record/${hash.slice(0, 12)}`;
   const headRef = `${head.owner}:${work}`;
 
@@ -269,7 +237,7 @@ async function openPullRequest(
       method: "POST",
       body: JSON.stringify({
         ref: `refs/heads/${work}`,
-        sha: (base.object as { sha: string }).sha,
+        sha: base.object.sha,
       }),
     });
   } catch (error) {
@@ -292,7 +260,7 @@ async function openPullRequest(
       body: JSON.stringify({
         message: `Record ${record.system} (${record.operator})`,
         content: Buffer.from(updated, "utf8").toString("base64"),
-        sha: current.sha as string,
+        sha: current.sha,
         branch: work,
       }),
     });
@@ -319,16 +287,16 @@ async function openPullRequest(
         maintainer_can_modify: true,
       }),
     });
-    return pull.html_url as string;
+    return pull.html_url;
   } catch (error) {
     if (!(error instanceof GithubError) || error.status !== 422) {
       throw error;
     }
     // 422 again means the pull request is already open — the answer is its URL, not an error.
-    const open = (await github(
+    const open = await github(
       `/repos/${slug(target)}/pulls?state=open&head=${encodeURIComponent(headRef)}&base=${branch}`,
       token,
-    )) as unknown as Array<{ html_url: string }>;
+    );
     const first = open[0];
     if (!first) {
       throw error;
@@ -337,11 +305,11 @@ async function openPullRequest(
   }
 }
 
-const answer = (body: Record<string, unknown>, status: number) =>
+const answer = (body, status) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
 /** POST a record, get back the pull request. Everything else is a refusal with a reason. */
-export async function handleProofOfUsage(request: Request) {
+export async function handleProofOfUsage(request) {
   if (request.method !== "POST") {
     return answer({ ok: false, error: "POST a proof-of-usage record here" }, 405);
   }
@@ -356,9 +324,9 @@ export async function handleProofOfUsage(request: Request) {
     return answer({ ok: false, error: "a record is smaller than that" }, 413);
   }
 
-  let body: Record<string, unknown>;
+  let body;
   try {
-    body = (await request.json()) as Record<string, unknown>;
+    body = await request.json();
   } catch {
     return answer({ ok: false, error: "expected a JSON object" }, 400);
   }
@@ -374,7 +342,7 @@ export async function handleProofOfUsage(request: Request) {
     // hash is computed against a URL, and GitHub's canonical name is the one the repository's own
     // validation workflow will hash, so a redirecting URL has to be corrected before recording.
     const repo = await github(`/repos/${slug(target)}`, token);
-    const canonical = (repo.full_name as string).toLowerCase();
+    const canonical = repo.full_name.toLowerCase();
     if (canonical !== slug(target).toLowerCase()) {
       return answer(
         {
@@ -385,9 +353,7 @@ export async function handleProofOfUsage(request: Request) {
       );
     }
 
-    const licence = await github(`/repos/${slug(target)}/contents/LICENSE.md`, token).catch(
-      () => null,
-    );
+    const licence = await github(`/repos/${slug(target)}/contents/LICENSE.md`, token).catch(() => null);
     if (!licence || !namesEndpoint(decode(licence), endpoint)) {
       return answer(
         {
@@ -401,7 +367,7 @@ export async function handleProofOfUsage(request: Request) {
     const existing = await github(
       `/repos/${slug(target)}/contents/${recordFile}?ref=${branch}`,
       token,
-    ).catch((cause: unknown) => {
+    ).catch((cause) => {
       if (cause instanceof GithubError && (cause.status === 404 || cause.status === 403)) {
         return null;
       }

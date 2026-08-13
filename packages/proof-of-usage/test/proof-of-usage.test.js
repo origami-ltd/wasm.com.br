@@ -9,9 +9,9 @@ import {
   parseRepo,
   provenanceHash,
   readRecord,
-} from "../src/index.ts";
+} from "../src/index.js";
 
-// node --test tests/proof-of-usage.test.ts
+// node --test test/proof-of-usage.test.js
 
 const example = {
   system: "ExampleModel v2",
@@ -70,12 +70,12 @@ test("the row lands in the table, not at the end of the file", () => {
   ].join("\n");
 
   const { record, hash } = readRecord({ ...example, system: "GPT-5.6 Sol", operator: "OpenAI" });
-  const row = buildRow(record!, hash!);
-  const updated = insertRow(file, row)!.split("\n");
+  const row = buildRow(record, hash);
+  const updated = insertRow(file, row).split("\n");
 
   assert.equal(updated[5], row);
   assert.equal(updated.at(-1), "| Field | Meaning |");
-  assert.ok(alreadyRecorded(updated.join("\n"), hash!));
+  assert.ok(alreadyRecorded(updated.join("\n"), hash));
   assert.equal(insertRow("no table here", row), null);
 });
 
