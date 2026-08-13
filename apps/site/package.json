@@ -1,12 +1,17 @@
 {
   "name": "@wasm/site",
   "private": true,
-  "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
     "@origami-ltd/ui": "*",
     "next": "^15.3.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@wasm/proof-of-usage": "*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",

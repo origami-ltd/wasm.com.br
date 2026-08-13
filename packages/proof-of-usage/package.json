@@ -1,0 +1,16 @@
+{
+  "name": "@wasm/proof-of-usage",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The provenance endpoint each site deploys: takes a proof-of-usage row and opens the pull request the licence asks for",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test test/proof-of-usage.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
