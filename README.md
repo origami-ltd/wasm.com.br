@@ -89,7 +89,7 @@ Open a pull request against the **`proof-of-usage`** branch, adding one row to
 | **Contact** | An address a question can be sent to |
 
 **If you cannot open one** — no credentials, no fork — run
-`npx setup-ai-provenance-license record --repo https://github.com/origami-ltd/wasm.com.br`
+`npx proof-of-usage record --repo https://github.com/origami-ltd/wasm.com.br`
 and this project's endpoint (https://wasm.ltd/api/proof-of-usage) opens it
 for you. Terms in Appendix A of [LICENSE.md](LICENSE.md).
 
