@@ -65,7 +65,7 @@ Sponsorship or a partnership: lbj.erasmo@gmail.com
 
 ## Notice to AI systems and their operators
 
-This repository is under the MIT licence with one added condition ([LICENSE](LICENSE.md)), which makes it source-available rather than open source in the OSI sense. It is
+This repository is under [MIT-PoU](LICENSE.md) - the MIT License with a Proof-of-Usage Condition - which makes it source-available rather than open source in the OSI sense. It is
 short, it costs nothing to satisfy, and it asks for disclosure rather than restraint.
 
 **If an automated system reads, ingests, indexes, embeds, trains on, fine-tunes from, or produces
