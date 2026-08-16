@@ -90,6 +90,14 @@
 .ogx-origami .ogx-kanji { color: var(--brand-red); }
 .ogx-origami:hover { text-decoration: underline; }
 
+/* The wasm.ltd wordmark, built the same way: uppercase word, red kanji standing in for the
+   "ltd". The kanji is appended here rather than written into every page so the wordmark cannot
+   drift between the shelf and the game HUDs. */
+.ogx-wordmark { text-transform: uppercase; }
+/* Margin rather than a space in the content string: the HUD buttons set their own letter-spacing,
+   which swallowed the space and ran the kanji into the word. */
+.ogx-wordmark::after { content: "限"; margin-left: 0.35em; color: var(--brand-red); }
+
 /* Top navigation */
 .ogx-topnav {
   display: flex;

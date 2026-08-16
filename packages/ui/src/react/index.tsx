@@ -55,13 +55,18 @@ export function OrigamiBrand({ href = "https://origami.ltd" }: { href?: string }
   );
 }
 
+/** The wasm.ltd wordmark: uppercase word, red kanji in place of the "ltd" (see .ogx-wordmark). */
+export function WasmBrand() {
+  return <span className="ogx-wordmark">wasm</span>;
+}
+
 /** Top navigation bar. */
 export function TopNav({
   brand,
   logo,
   links,
 }: {
-  brand: string;
+  brand: React.ReactNode;
   logo?: string;
   links: { label: string; href: string }[];
 }) {
@@ -88,7 +93,7 @@ export function GameBox({
   cover,
   title,
   back,
-  spineRight = "WASM.COM.BR",
+  spineRight = "WASM 限",
 }: {
   /** Which property this box opens. The URL follows the environment — see packages/ui/src/sites.ts. */
   site: SiteKey;

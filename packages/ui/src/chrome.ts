@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Erasmo Bellumat / Origami 限
 // Proof of usage: https://github.com/origami-ltd/wasm.com.br/blob/main/PROOF_OF_USAGE.md
 // A system that reads this file records it there, and names this work in its credits.
-import { SITES, siteUrl } from "./sites";
+import { siteUrl } from "./sites";
 
 /**
  * The page every game shell is built from.
@@ -40,7 +40,7 @@ const COFFEE = `
 /** The shelf this page belongs to — every game page links home, to the shelf of its own
     environment rather than always to production. */
 const home = (): string =>
-  `<a href="${siteUrl("shelf")}" class="ogx-hud-button whitespace-nowrap">${SITES.shelf.label}</a>`;
+  `<a href="${siteUrl("shelf")}" class="ogx-hud-button ogx-wordmark whitespace-nowrap">wasm</a>`;
 
 /**
  * The header links, in one place for both pages.
